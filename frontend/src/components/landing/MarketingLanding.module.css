@@ -1,0 +1,700 @@
+.marketingPage {
+  min-height: 100vh;
+  background: #18091a;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+.marketingHero {
+  position: relative;
+  background: radial-gradient(circle at 50% 30%, #3e1b4a 0, #18091a 60%);
+  min-height: 700px;
+  padding-bottom: 70px;
+}
+
+.marketingNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 35px;
+  height: 70px;
+}
+
+.marketingLogo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+}
+
+.marketingLogoMark {
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.marketingLogoMark i {
+  width: 3px;
+  height: 12px;
+  background: #18091a;
+  border-radius: 1px;
+  display: block;
+}
+
+.marketingNavLinks {
+  display: flex;
+  gap: 24px;
+}
+
+.marketingNavLinks button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  opacity: 0.85;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.15s ease;
+}
+
+.marketingNavLinks button:hover {
+  opacity: 1;
+}
+
+.marketingNavActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.marketingNavActions button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.15s ease;
+}
+
+.marketingNavActions button:hover {
+  opacity: 1;
+}
+
+.marketingSignup {
+  background: #fff !important;
+  color: #18091a !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  transition: transform 0.15s ease, background 0.15s ease !important;
+}
+
+.marketingSignup:hover {
+  background: #f3f4f6 !important;
+  transform: translateY(-1px);
+}
+
+.marketingHeroCopy {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  padding: 60px 20px 30px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.marketingEyebrow {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  opacity: 0.8;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.marketingHeroCopy h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  font-size: clamp(40px, 4.5vw, 64px);
+  line-height: 1.05;
+  margin: 0 0 1rem;
+}
+
+.marketingSubtitle {
+  margin: 20px auto 30px;
+  max-width: 540px;
+  font-size: 15px;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
+.marketingPrimary {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  background: #fff;
+  color: #271e29;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.marketingPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.marketingCapabilities {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 920px;
+  margin: 24px auto 0;
+  padding: 0 20px;
+}
+
+.marketingCapability {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(56, 39, 58, 0.65);
+  min-height: 135px;
+  border-radius: 8px;
+  text-align: left;
+  padding: 18px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.marketingCapability:hover {
+  background: #3c2a3d;
+  transform: translateY(-3px);
+}
+
+.marketingCardLabel {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0.65;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.marketingCapability strong {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.marketingCapability span:not(.marketingCardLabel) {
+  font-size: 11px;
+  display: block;
+  max-width: 220px;
+  line-height: 1.35;
+  opacity: 0.8;
+}
+
+.marketingCapability em {
+  font-style: normal;
+  border-radius: 6px;
+  background: #a342c4;
+  font-size: 9px;
+  padding: 2px 6px;
+  margin-left: 4px;
+}
+
+.marketingCardArrow {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  opacity: 0.65;
+}
+
+.heroGlow {
+  position: absolute;
+  width: 520px;
+  height: 260px;
+  background: radial-gradient(ellipse, rgba(161, 55, 227, 0.85), rgba(151, 56, 216, 0.17) 43%, transparent 70%);
+  right: -50px;
+  bottom: -170px;
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+/* Flow Section */
+.marketingFlowSection {
+  padding: 100px max(7vw, 35px);
+  display: grid;
+  grid-template-columns: 32% 1fr;
+  min-height: 560px;
+  gap: 50px;
+  background: #18091a;
+}
+
+.flowIntro h2, .marketingPromptSection h2, .marketingCases h2, .marketingIntegrations h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: clamp(36px, 4vw, 54px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
+
+.flowIntro > p:last-child {
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 300px;
+  margin-top: 20px;
+  opacity: 0.8;
+}
+
+.flowBoard {
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  padding-left: 35px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-content: start;
+}
+
+.flowBoard article {
+  min-height: 160px;
+  font-size: 13px;
+}
+
+.flowBoard article svg {
+  margin-bottom: 14px;
+  width: 22px;
+  height: 22px;
+  color: #d8b4fe;
+}
+
+.flowBoard article span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.flowBoard article strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.flowBoard article em {
+  font-style: normal;
+  border-radius: 6px;
+  background: #a342c4;
+  font-size: 9px;
+  padding: 2px 6px;
+  margin-left: 4px;
+}
+
+.flowBoard article p {
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0.75;
+}
+
+.flowBoard article b {
+  display: block;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.flowVisual {
+  grid-column: span 3;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: radial-gradient(circle at 55% 80%, #9b3eb8 0, #593248 32%, transparent 65%);
+}
+
+.flowForm {
+  color: #251e29;
+  width: 260px;
+  background: #fffbe3;
+  border-radius: 6px;
+  padding: 20px;
+  position: absolute;
+  left: 15%;
+  top: 24px;
+  box-shadow: 0 16px 32px rgba(18, 11, 20, 0.4);
+  transform: rotate(-0.5deg);
+}
+
+.flowForm span {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.flowForm strong {
+  font-family: Georgia, serif;
+  display: block;
+  font-size: 18px;
+  margin-top: 8px;
+}
+
+.flowForm div {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.flowForm i {
+  width: 28px;
+  height: 28px;
+  background: #dfd3b7;
+  display: block;
+  border-radius: 4px;
+}
+
+/* Prompt Section */
+.marketingPromptSection {
+  color: #281e29;
+  background: #f7f6f5;
+  padding: 95px max(8vw, 35px) 55px;
+  display: grid;
+  grid-template-columns: 31% 41% 1fr;
+  column-gap: 50px;
+}
+
+.marketingPromptSection > div > p:not(.marketingEyebrow) {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 20px 0;
+  max-width: 320px;
+  color: #4b5563;
+}
+
+.marketingDarkButton {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: #ffffff;
+  background: #281e29;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.marketingDarkButton:hover {
+  transform: translateY(-2px);
+}
+
+.promptArt {
+  min-height: 260px;
+  position: relative;
+  background: linear-gradient(135deg, #ded8d3, #f1eeee);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+.promptWindow {
+  width: 250px;
+  min-height: 155px;
+  padding: 18px;
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  background: #f4ffd6;
+  border-radius: 6px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
+}
+
+.promptWindow span {
+  font-family: Georgia, serif;
+  font-size: 22px;
+}
+
+.promptWindow p {
+  font-size: 12px;
+  line-height: 1.35;
+  width: 170px;
+  margin-top: 18px;
+  color: #374151;
+}
+
+.promptWindow button {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #281e29;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.promptChip {
+  position: absolute;
+  background: #29202d;
+  color: white;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.chipOne {
+  left: 20px;
+  top: 90px;
+}
+
+.chipTwo {
+  right: 20px;
+  bottom: 30px;
+}
+
+.marketingFeatureList {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 45px;
+}
+
+.marketingFeatureList article {
+  display: flex;
+  gap: 12px;
+}
+
+.marketingFeatureList svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #059669;
+}
+
+.marketingFeatureList strong {
+  font-size: 14px;
+  color: #191919;
+}
+
+.marketingFeatureList p {
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 4px;
+  max-width: 250px;
+  color: #6b7280;
+}
+
+/* Trust section */
+.marketingTrust {
+  color: #281e29;
+  background: #ffffff;
+  text-align: center;
+  padding: 55px 20px 0;
+}
+
+.marketingTrust p {
+  font-family: Georgia, serif;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.marketingTrust div {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-top: 32px;
+  padding: 24px 0;
+  border-top: 1px solid #eee;
+  font-size: 18px;
+  font-weight: 700;
+  color: #4b5563;
+}
+
+/* Cases */
+.marketingCases {
+  color: #281e29;
+  display: grid;
+  grid-template-columns: 32% 1fr 1fr;
+  gap: 16px;
+  padding: 95px max(7vw, 35px);
+  background: #ffffff;
+}
+
+.caseCopy .marketingDarkButton {
+  margin-top: 28px;
+}
+
+.marketingCases article {
+  min-height: 250px;
+  border-radius: 10px;
+  padding: 26px;
+  background: linear-gradient(135deg, #eee6ff, #d8c2ef);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.marketingCases article:nth-child(3) {
+  background: linear-gradient(135deg, #f9e8fd, #d9c4ed);
+}
+
+.marketingCases span {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.marketingCases strong {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.15;
+  max-width: 260px;
+}
+
+/* Integrations */
+.marketingIntegrations {
+  color: #281e29;
+  text-align: center;
+  background: #f5f3f2;
+  padding: 90px 20px;
+}
+
+.marketingIntegrations h2 {
+  font-size: 42px;
+}
+
+.marketingIntegrations div {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  max-width: 860px;
+  margin: 40px auto 0;
+}
+
+.marketingIntegrations span {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px 26px;
+  min-width: 115px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Footer */
+.marketingFooter {
+  padding: 70px max(5vw, 30px);
+  display: grid;
+  grid-template-columns: 2.2fr repeat(5, 1fr);
+  gap: 28px;
+  font-size: 12px;
+  background: #18091a;
+  color: #fff;
+}
+
+.marketingFooter > div:not(.marketingLogo) {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.marketingFooter strong {
+  font-size: 11px;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.marketingFooter a {
+  opacity: 0.8;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.marketingFooter a:hover {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .marketingNav {
+    padding: 0 16px;
+  }
+  .marketingNavLinks {
+    display: none;
+  }
+  .marketingNavActions > button:not(.marketingSignup) {
+    display: none;
+  }
+  .marketingCapabilities {
+    grid-template-columns: 1fr;
+  }
+  .marketingFlowSection, .marketingPromptSection, .marketingCases {
+    grid-template-columns: 1fr;
+    padding: 70px 20px;
+  }
+  .flowBoard {
+    border-left: 0;
+    padding-left: 0;
+    margin-top: 20px;
+    grid-template-columns: 1fr;
+  }
+  .flowVisual {
+    grid-column: span 1;
+  }
+  .marketingFeatureList {
+    grid-template-columns: 1fr;
+  }
+  .marketingTrust div {
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .marketingFooter {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .marketingFooter .marketingLogo {
+    grid-column: span 2;
+  }
+}

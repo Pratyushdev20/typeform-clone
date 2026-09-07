@@ -306,7 +306,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
           {loadError || "This form is either unpublished, private, or does not exist."}
         </p>
         <Link
-          href="/"
+          href="/dashboard"
           style={{
             marginTop: "1rem",
             padding: "0.65rem 1.4rem",
@@ -627,7 +627,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
               )}
             </p>
             <div className={styles.thankYouActionArea}>
-              <Link href="/" className={styles.createTypeformBtn}>
+              <Link href="/dashboard" className={styles.createTypeformBtn}>
                 Create a form
               </Link>
             </div>

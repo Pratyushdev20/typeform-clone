@@ -409,7 +409,7 @@ export const FormBuilderView: React.FC = () => {
         <div className={styles.errorIcon}>⚠</div>
         <h2 className={styles.feedbackTitle}>Error loading form</h2>
         <p className={styles.errorDesc}>{error || "Form not found"}</p>
-        <button className={styles.backHomeBtn} onClick={() => router.push("/")}>
+        <button className={styles.backHomeBtn} onClick={() => router.push("/dashboard")}>
           ← Back to workspace
         </button>
       </div>
