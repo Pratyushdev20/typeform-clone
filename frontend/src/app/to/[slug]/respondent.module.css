@@ -1,0 +1,398 @@
+.pageContainer {
+  min-height: 100vh;
+  width: 100vw;
+  background-color: var(--background);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+/* Top Progress Bar */
+.progressBarTrack {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  z-index: 50;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Center Content */
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Card / Question Container */
+.questionCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.requiredTag {
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.questionTitle {
+  font-size: 1.85rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.questionDesc {
+  font-size: 1.05rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: -0.5rem;
+}
+
+/* Inputs */
+.inputArea {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.underlineInput {
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid var(--border);
+  padding: 0.75rem 0;
+  font-size: 1.35rem;
+  background: transparent;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.underlineInput:focus {
+  border-color: var(--primary);
+}
+
+.textareaInput {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.15rem;
+  background: var(--surface);
+  color: var(--foreground);
+  min-height: 120px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.textareaInput:focus {
+  border-color: var(--primary);
+}
+
+/* Choices */
+.choicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.choiceCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.choiceCard:hover {
+  border-color: var(--primary);
+  background: rgba(4, 69, 175, 0.04);
+}
+
+.choiceCardSelected {
+  border-color: var(--primary);
+  background: rgba(4, 69, 175, 0.08);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.keyBadge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--background);
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.choiceCardSelected .keyBadge {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* Dropdown */
+.selectInput {
+  width: 100%;
+  padding: 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  background: var(--surface);
+  color: var(--foreground);
+  outline: none;
+}
+
+.selectInput:focus {
+  border-color: var(--primary);
+}
+
+/* Yes/No */
+.yesNoRow {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.yesNoBtn {
+  flex: 1;
+  padding: 1.25rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.yesNoBtn:hover {
+  border-color: var(--primary);
+  background: rgba(4, 69, 175, 0.04);
+}
+
+.yesNoBtnSelected {
+  border-color: var(--primary);
+  background: rgba(4, 69, 175, 0.08);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+/* Rating */
+.ratingRow {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ratingBtn {
+  width: 52px;
+  height: 52px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ratingBtn:hover {
+  border-color: var(--primary);
+  background: rgba(4, 69, 175, 0.05);
+}
+
+.ratingBtnSelected {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Action Area */
+.actionArea {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.nextBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nextBtn:hover {
+  background: var(--primary-hover);
+}
+
+.enterHint {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.errorText {
+  color: var(--danger);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: -0.5rem;
+}
+
+/* Bottom Navigation Bar */
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  z-index: 50;
+}
+
+.bottomNavLeft {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.navChevrons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.navChevronBtn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navChevronBtn:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.navChevronBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Welcome / Thank You Screens */
+.welcomeCard, .thankYouCard {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.welcomeTitle, .thankYouTitle {
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.welcomeDesc, .thankYouDesc {
+  font-size: 1.15rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.celebrateIcon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.centerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+}

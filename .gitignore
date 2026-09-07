@@ -1,0 +1,85 @@
+# =========================
+# Python / FastAPI Backend
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Database
+# =========================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Next.js / React Frontend
+# =========================
+
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Generic Node
+node_modules/
+
+# =========================
+# Logs
+# =========================
+
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# IDE / Editor
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Operating System
+# =========================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Build / Temporary Files
+# =========================
+
+dist/
+build/
+*.tmp
+*.temp
+
+# =========================
+# TypeScript
+# =========================
+
+*.tsbuildinfo
+next-env.d.ts

@@ -1,0 +1,496 @@
+.resultsContainer {
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navLink {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.navLink:hover {
+  background: var(--border);
+  color: var(--foreground);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.responseCountBadge {
+  background: rgba(4, 69, 175, 0.1);
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 99px;
+}
+
+/* Tabs */
+.tabNav {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  border-bottom: 2px solid transparent;
+}
+
+.tabBtn {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 0.5rem 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: none;
+}
+
+.tabBtn:hover {
+  color: var(--foreground);
+}
+
+.tabBtnActive {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+/* Main Content */
+.contentArea {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Metrics Row */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.metricCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metricLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricValue {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  line-height: 1.1;
+}
+
+/* Question Stats Section */
+.statsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.questionStatCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.qHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.qLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.qIndex {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(4, 69, 175, 0.1);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.qTypeBadge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 99px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.qCountBadge {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Progress Bar Charts */
+.barsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.barRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.barLabelRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.barTrack {
+  width: 100%;
+  height: 10px;
+  background: var(--background);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.barFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+/* Rating Stats */
+.ratingContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ratingOverview {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.ratingScore {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.ratingMax {
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+/* Number Stats Chips */
+.numberChipsRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.numberChip {
+  flex: 1;
+  min-width: 140px;
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.chipLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.chipValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Text Answers List */
+.textAnswersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.textAnswerItem {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Responses Table View */
+.tableCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.responsesTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.responsesTable th {
+  background: var(--background);
+  padding: 1rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.responsesTable td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.responsesTable tr:last-child td {
+  border-bottom: none;
+}
+
+.responsesTable tr:hover td {
+  background: rgba(4, 69, 175, 0.02);
+}
+
+.viewDetailBtn {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--primary);
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewDetailBtn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Modal for Individual Response */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1.5rem;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 650px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.modalHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalTitle {
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.modalCloseBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+
+.modalCloseBtn:hover {
+  background: var(--border);
+  color: var(--foreground);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.answerBlock {
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.answerQTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.answerValue {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* Empty & Loading States */
+.emptyCard {
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  padding: 4rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emptyTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.emptyDesc {
+  color: var(--muted);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.centerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 1rem;
+  text-align: center;
+}

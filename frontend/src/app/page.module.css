@@ -1,0 +1,189 @@
+.dashboard {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  letter-spacing: -0.05em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 240px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 99px;
+  font-weight: 500;
+}
+
+.badgeDraft {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badgePublished {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.cardBody {
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.responses {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.iconBtn {
+  padding: 0.5rem;
+  border-radius: 6px;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.iconBtn:hover {
+  background: var(--border);
+  color: var(--foreground);
+}
+
+.createCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border);
+  background: transparent;
+  cursor: pointer;
+}
+
+.createCard:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(4, 69, 175, 0.02);
+}
+
+.createIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--surface);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.1);
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.formGroup input, .formGroup textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
