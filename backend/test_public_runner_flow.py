@@ -1,55 +1,147 @@
 import json
-import urllib.request
+from fastapi.testclient import TestClient
+from main import app
+from seed import seed_data
 
-API_BASE = "http://127.0.0.1:8000/api"
+client = TestClient(app)
 
-def make_req(endpoint, method="GET", data=None):
-    url = f"{API_BASE}{endpoint}"
-    req = urllib.request.Request(url, method=method)
-    req.add_header("Content-Type", "application/json")
-    body = json.dumps(data).encode("utf-8") if data else None
-    try:
-        with urllib.request.urlopen(req, data=body) as response:
-            return response.getcode(), json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        return e.code, json.loads(e.read().decode("utf-8"))
+def run_public_runner_e2e_tests():
+    print("=== Step 0: Seed Database ===")
+    seed_data()
 
-def test_public_runner():
-    print("=== Test 1: Fetch Published Form by Slug ===")
-    status, form = make_req("/public/forms/cust-sat-123")
-    assert status == 200, f"Expected 200, got {status}"
-    assert form["slug"] == "cust-sat-123"
-    assert form["is_published"] is True
-    print(f"[OK] Fetched public form: '{form['title']}' with {len(form['questions'])} questions.")
+    print("\n=== Step 1: Create a Full Form with all 8 Question Types ===")
+    create_form_res = client.post("/api/forms/", json={
+        "title": "Welcome to Your Request and Task Tracker",
+        "description": "Easily organize your events, projects, and incoming requests.",
+        "thank_you_title": "Thanks for completing this form",
+        "thank_you_message": "Now create your own — it's free, easy & beautiful"
+    })
+    assert create_form_res.status_code == 200, f"Failed to create form: {create_form_res.text}"
+    form = create_form_res.json()
+    form_id = form["id"]
+    slug = form["slug"]
+    print(f"[OK] Created Form #{form_id} with Slug: '{slug}'")
 
-    print("\n=== Test 2: Attempt to Fetch Non-existent / Unpublished Slug ===")
-    status, error_resp = make_req("/public/forms/non-existent-slug-xyz")
-    assert status == 404, f"Expected 404, got {status}"
-    print(f"[OK] Non-existent slug correctly returned 404: {error_resp['detail']}")
+    # Add all 8 question types
+    questions_data = [
+        {"title": "What is your full name?", "question_type": "short_text", "is_required": True, "order_index": 0},
+        {"title": "Please provide your work email address", "question_type": "email", "is_required": True, "order_index": 1},
+        {"title": "How many team members will participate?", "question_type": "number", "is_required": False, "order_index": 2},
+        {"title": "Which department are you in?", "question_type": "multiple_choice", "is_required": True, "order_index": 3,
+         "options": [{"value": "Engineering"}, {"value": "Design"}, {"value": "Product"}, {"value": "Marketing"}]},
+        {"title": "Select your primary location", "question_type": "dropdown", "is_required": False, "order_index": 4,
+         "options": [{"value": "San Francisco"}, {"value": "New York"}, {"value": "London"}, {"value": "Remote"}]},
+        {"title": "Are you the main point of contact?", "question_type": "yes_no", "is_required": True, "order_index": 5},
+        {"title": "How urgent is this request on a scale of 1-5?", "question_type": "rating", "is_required": True, "order_index": 6},
+        {"title": "Any additional project notes or context?", "question_type": "long_text", "is_required": False, "order_index": 7},
+    ]
 
-    print("\n=== Test 3: Submit Valid Responses via Public API ===")
-    answers = []
-    for q in form["questions"]:
-        if q["question_type"] == "short_text":
-            answers.append({"question_id": q["id"], "text_value": "John Doe"})
-        elif q["question_type"] == "rating":
-            answers.append({"question_id": q["id"], "number_value": 5, "text_value": "5"})
-        elif q["question_type"] == "long_text":
-            answers.append({"question_id": q["id"], "text_value": "Loved the clean UI!"})
-        elif q["question_type"] == "yes_no":
-            answers.append({"question_id": q["id"], "boolean_value": True, "text_value": "yes"})
+    created_questions = []
+    for q_data in questions_data:
+        res = client.post(f"/api/forms/{form_id}/questions", json=q_data)
+        assert res.status_code == 200, f"Failed to add question {q_data['title']}: {res.text}"
+        created_questions.append(res.json())
 
-    status, submit_resp = make_req("/public/forms/cust-sat-123/responses", method="POST", data={"answers": answers})
-    assert status == 200, f"Expected 200, got {status}: {submit_resp}"
-    assert submit_resp["form_id"] == form["id"]
-    assert len(submit_resp["answers"]) == len(answers)
-    print(f"[OK] Response submitted successfully! Response ID: {submit_resp['id']}")
+    print(f"[OK] Added {len(created_questions)} questions spanning all 8 question types.")
 
-    print("\n=== Test 4: Verify Results Count Incremented ===")
-    status, updated_form = make_req(f"/forms/{form['id']}")
-    print(f"[OK] Form response count updated to: {updated_form.get('response_count')}")
+    print("\n=== Step 2: Verify Unpublished Form is Rejected with 404 ===")
+    pub_res = client.get(f"/api/public/forms/{slug}")
+    assert pub_res.status_code == 404, f"Expected 404 for unpublished form, got {pub_res.status_code}"
+    print("[OK] Unpublished form correctly returns 404.")
 
-    print("\nALL PUBLIC RESPONDENT ENDPOINTS TESTED AND WORKING!")
+    print("\n=== Step 3: Publish the Form ===")
+    publish_res = client.put(f"/api/forms/{form_id}", json={"is_published": True})
+    assert publish_res.status_code == 200
+    assert publish_res.json()["is_published"] is True
+    print("[OK] Form published successfully.")
+
+    print("\n=== Step 4: GET /api/public/forms/{slug} ===")
+    pub_form_res = client.get(f"/api/public/forms/{slug}")
+    assert pub_form_res.status_code == 200
+    pub_form = pub_form_res.json()
+    assert pub_form["title"] == "Welcome to Your Request and Task Tracker"
+    assert pub_form["description"] == "Easily organize your events, projects, and incoming requests."
+    assert len(pub_form["questions"]) == 8
+    print(f"[OK] Public form loaded with {len(pub_form['questions'])} questions and correct metadata.")
+
+    # Also test numeric ID lookup fallback in GET /api/public/forms/{id}
+    pub_id_res = client.get(f"/api/public/forms/{form_id}")
+    assert pub_id_res.status_code == 200
+    print("[OK] Fallback numeric ID lookup in public router works properly.")
+
+    print("\n=== Step 5: Test Validation Rejections ===")
+    # 5a. Missing required field (name)
+    invalid_sub_1 = client.post(f"/api/public/forms/{slug}/responses", json={
+        "answers": [
+            {"question_id": created_questions[0]["id"], "text_value": ""}, # required name empty
+            {"question_id": created_questions[1]["id"], "text_value": "user@example.com"}
+        ]
+    })
+    assert invalid_sub_1.status_code == 400
+    print(f"[OK] Missing required field rejected: {invalid_sub_1.json()['detail']}")
+
+    # 5b. Invalid email format
+    invalid_sub_2 = client.post(f"/api/public/forms/{slug}/responses", json={
+        "answers": [
+            {"question_id": created_questions[0]["id"], "text_value": "Alex Doe"},
+            {"question_id": created_questions[1]["id"], "text_value": "not-an-email"},
+            {"question_id": created_questions[3]["id"], "text_value": "Engineering"},
+            {"question_id": created_questions[5]["id"], "boolean_value": True},
+            {"question_id": created_questions[6]["id"], "number_value": 4}
+        ]
+    })
+    assert invalid_sub_2.status_code == 400
+    print(f"[OK] Invalid email format rejected: {invalid_sub_2.json()['detail']}")
+
+    # 5c. Invalid Multiple Choice option
+    invalid_sub_3 = client.post(f"/api/public/forms/{slug}/responses", json={
+        "answers": [
+            {"question_id": created_questions[0]["id"], "text_value": "Alex Doe"},
+            {"question_id": created_questions[1]["id"], "text_value": "alex@company.com"},
+            {"question_id": created_questions[3]["id"], "text_value": "Astronomy"}, # invalid option
+            {"question_id": created_questions[5]["id"], "boolean_value": True},
+            {"question_id": created_questions[6]["id"], "number_value": 4}
+        ]
+    })
+    assert invalid_sub_3.status_code == 400
+    print(f"[OK] Invalid multiple choice option rejected: {invalid_sub_3.json()['detail']}")
+
+    print("\n=== Step 6: Submit Complete Valid Response ===")
+    valid_answers = [
+        {"question_id": created_questions[0]["id"], "text_value": "Alex Doe"},
+        {"question_id": created_questions[1]["id"], "text_value": "alex@company.com"},
+        {"question_id": created_questions[2]["id"], "number_value": 5, "text_value": "5"},
+        {"question_id": created_questions[3]["id"], "text_value": "Engineering"},
+        {"question_id": created_questions[4]["id"], "text_value": "San Francisco"},
+        {"question_id": created_questions[5]["id"], "boolean_value": True, "text_value": "yes"},
+        {"question_id": created_questions[6]["id"], "number_value": 5, "text_value": "5"},
+        {"question_id": created_questions[7]["id"], "text_value": "Everything looks great!"},
+    ]
+
+    valid_res = client.post(f"/api/public/forms/{slug}/responses", json={"answers": valid_answers})
+    assert valid_res.status_code == 200, f"Valid submission failed: {valid_res.text}"
+    saved_response = valid_res.json()
+    assert saved_response["form_id"] == form_id
+    assert len(saved_response["answers"]) == 8
+    print(f"[OK] Response submitted successfully with ID: {saved_response['id']}")
+
+    print("\n=== Step 7: Verify Response Appears in Results Page API ===")
+    res_list = client.get(f"/api/forms/{form_id}/responses")
+    assert res_list.status_code == 200
+    responses = res_list.json()
+    assert len(responses) == 1
+    assert responses[0]["id"] == saved_response["id"]
+    print(f"[OK] Response verified in GET /api/forms/{form_id}/responses")
+
+    stats_res = client.get(f"/api/forms/{form_id}/stats")
+    assert stats_res.status_code == 200
+    stats = stats_res.json()
+    assert stats["total_responses"] == 1
+    print(f"[OK] Total responses in stats endpoint: {stats['total_responses']}")
+
+    print("\n====================================================")
+    print("ALL 7 PUBLIC RUNNER FLOW STEPS PASSED SUCCESSFULLY!")
+    print("====================================================")
 
 if __name__ == "__main__":
-    test_public_runner()
+    run_public_runner_e2e_tests()

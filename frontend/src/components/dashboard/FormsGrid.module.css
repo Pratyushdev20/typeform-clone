@@ -1,0 +1,109 @@
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Polished empty state */
+.emptyStateCard {
+  background-color: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 14px;
+  padding: 72px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 380px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.emptyIconContainer {
+  width: 72px;
+  height: 72px;
+  background-color: #f4f4f5;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.emptyHeading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #18181b;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.emptyDescription {
+  font-size: 0.9375rem;
+  color: #71717a;
+  max-width: 440px;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.emptyActionBtn {
+  background-color: #18181b;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 10px 24px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.emptyActionBtn:hover {
+  background-color: #000000;
+  transform: translateY(-1px);
+}
+
+.btnPlus {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Search empty state */
+.emptySearchContainer {
+  background-color: #ffffff;
+  border: 1px dashed #e2e8f0;
+  border-radius: 12px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.searchIconWrapper {
+  width: 48px;
+  height: 48px;
+  background-color: #f8fafc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.emptyTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.emptySubtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  max-width: 360px;
+  margin-bottom: 20px;
+}

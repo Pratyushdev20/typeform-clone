@@ -39,6 +39,7 @@ export interface Form {
   updated_at: string;
   questions: Question[];
   response_count?: number;
+  completion_rate?: number | string;
 }
 
 export interface Answer {

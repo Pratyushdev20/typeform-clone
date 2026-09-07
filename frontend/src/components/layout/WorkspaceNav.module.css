@@ -1,0 +1,67 @@
+.navContainer {
+  background-color: #ffffff;
+  border-bottom: 1px solid #eef0f2;
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.navContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.tabsList {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  color: #52525b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.tabBtn:hover {
+  color: #18181b;
+}
+
+.tabBtnActive {
+  color: #18181b;
+  font-weight: 600;
+}
+
+.tabBtnActive::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background-color: #18181b;
+  border-radius: 2px 2px 0 0;
+}
+
+.gemIcon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.demoBadge {
+  font-size: 0.6875rem;
+  background-color: #f1f5f9;
+  color: #0369a1;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border: 1px solid #e0f2fe;
+}

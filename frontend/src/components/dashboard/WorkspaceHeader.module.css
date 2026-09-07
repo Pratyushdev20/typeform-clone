@@ -1,0 +1,208 @@
+.workspaceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobileMenuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  color: #4b5563;
+}
+
+.mobileMenuBtn:hover {
+  background-color: #f3f4f6;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #18181b;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.moreOptionsBtn {
+  color: #71717a;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.moreOptionsBtn:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.inviteBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #f4f4f5;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #3f3f46;
+  transition: all 0.15s ease;
+}
+
+.inviteBtn:hover {
+  background-color: #e4e4e7;
+  color: #18181b;
+}
+
+.gemIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.rightGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sortContainer {
+  position: relative;
+}
+
+.sortButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #52525b;
+  transition: all 0.15s ease;
+}
+
+.sortButton:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.chevron {
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.sortMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  width: 160px;
+  padding: 4px;
+  z-index: 40;
+}
+
+.sortMenuItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  font-size: 0.8125rem;
+  color: #3f3f46;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.sortMenuItem:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.sortMenuItemActive {
+  font-weight: 600;
+  color: #18181b;
+}
+
+.check {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.viewToggleGroup {
+  display: flex;
+  align-items: center;
+  background-color: #f4f4f5;
+  padding: 2px;
+  border-radius: 6px;
+}
+
+.viewToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #71717a;
+  transition: all 0.15s ease;
+}
+
+.viewToggleBtn:hover {
+  color: #18181b;
+}
+
+.viewToggleBtnActive {
+  background-color: #ffffff;
+  color: #18181b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.headerCreateBtn {
+  background-color: #18181b;
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.headerCreateBtn:hover {
+  background-color: #000000;
+  transform: translateY(-1px);
+}
+
+.plusIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .mobileMenuBtn {
+    display: inline-flex;
+  }
+}

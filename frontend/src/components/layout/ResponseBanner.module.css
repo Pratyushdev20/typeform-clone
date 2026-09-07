@@ -1,0 +1,88 @@
+.bannerWrapper {
+  padding: 12px 20px 4px 20px;
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.banner {
+  background-color: #eaf7f2;
+  border: 1px solid #d0efe2;
+  border-radius: 10px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.diamondIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+  flex-shrink: 0;
+}
+
+.bannerText {
+  font-size: 0.875rem;
+  color: #1e293b;
+  margin: 0;
+}
+
+.strongText {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.ctaButton {
+  background-color: #0d5447;
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.ctaButton:hover {
+  background-color: #083c32;
+  transform: translateY(-1px);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+}
+
+@media (max-width: 640px) {
+  .banner {
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+  }
+  .closeButton {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+}

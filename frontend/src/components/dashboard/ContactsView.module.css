@@ -1,0 +1,156 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #18181b;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #71717a;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.secondaryBtn {
+  background-color: #ffffff;
+  border: 1px solid #e4e4e7;
+  color: #3f3f46;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.secondaryBtn:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.primaryBtn {
+  background-color: #18181b;
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.primaryBtn:hover {
+  background-color: #000000;
+}
+
+.controlsBar {
+  margin-bottom: 20px;
+}
+
+.searchWrapper {
+  position: relative;
+  max-width: 320px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a1a1aa;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  background-color: #ffffff;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #18181b;
+}
+
+.emptyCard {
+  background-color: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 14px;
+  padding: 72px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 380px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.emptyIconWrapper {
+  width: 64px;
+  height: 64px;
+  background-color: #f4f4f5;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.emptyHeading {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #18181b;
+  margin-bottom: 8px;
+}
+
+.emptyText {
+  font-size: 0.875rem;
+  color: #71717a;
+  max-width: 440px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.emptyActions {
+  display: flex;
+  gap: 12px;
+}
+
+.importBtn {
+  background-color: #ffffff;
+  border: 1px solid #e4e4e7;
+  color: #18181b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.importBtn:hover {
+  background-color: #f4f4f5;
+}

@@ -1,0 +1,234 @@
+.settingsPanel {
+  width: 280px;
+  min-width: 280px;
+  background-color: #ffffff;
+  border-left: 1px solid #eef0f2;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 54px);
+  position: sticky;
+  top: 54px;
+  overflow-y: auto;
+}
+
+.panelHeader {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef0f2;
+}
+
+.headerTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #18181b;
+}
+
+.panelBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settingGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.settingLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #27272a;
+  margin-bottom: 6px;
+}
+
+.settingSubtext {
+  font-size: 0.75rem;
+  color: #71717a;
+}
+
+.selectInput {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: #18181b;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.selectInput:focus {
+  border-color: #18181b;
+}
+
+.textareaInput {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: #18181b;
+  background-color: #ffffff;
+  resize: vertical;
+  outline: none;
+}
+
+.textareaInput:focus {
+  border-color: #18181b;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e4e4e7;
+  transition: 0.2s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.switch input:checked + .slider {
+  background-color: #18181b;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Choices list */
+.choicesHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.miniAddBtn {
+  font-size: 0.75rem;
+  color: #2563eb;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.miniAddBtn:hover {
+  background-color: #eff6ff;
+}
+
+.choicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.choiceRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.choiceBadge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #71717a;
+  width: 16px;
+  text-align: center;
+}
+
+.choiceTextInput {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  outline: none;
+}
+
+.choiceTextInput:focus {
+  border-color: #18181b;
+}
+
+.choiceRemoveBtn {
+  color: #a1a1aa;
+  font-size: 0.75rem;
+  padding: 4px;
+}
+
+.choiceRemoveBtn:hover {
+  color: #dc2626;
+}
+
+.deleteSection {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #f4f4f5;
+}
+
+.deleteQuestionBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid #fee2e2;
+  background-color: #fff5f5;
+  transition: all 0.15s ease;
+}
+
+.deleteQuestionBtn:hover {
+  background-color: #fee2e2;
+}
+
+.emptySettingsInfo {
+  padding: 24px 16px;
+  text-align: center;
+  color: #71717a;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 992px) {
+  .settingsPanel {
+    display: none;
+  }
+}

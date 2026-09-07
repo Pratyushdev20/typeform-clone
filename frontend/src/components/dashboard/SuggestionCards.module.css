@@ -1,0 +1,98 @@
+.suggestionsContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 12px;
+  padding: 16px 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.card:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: #94a3b8;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+.cardContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-right: 24px;
+}
+
+.iconWrapper {
+  width: 32px;
+  height: 32px;
+  background-color: #faf5ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  color: #334155;
+  line-height: 1.4;
+  margin: 0;
+  font-weight: 400;
+}
+
+.cardAction {
+  display: flex;
+  align-items: center;
+}
+
+.useFormBtn {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.useFormBtn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+@media (max-width: 800px) {
+  .suggestionsContainer {
+    grid-template-columns: 1fr;
+  }
+}

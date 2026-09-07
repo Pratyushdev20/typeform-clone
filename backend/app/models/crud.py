@@ -14,7 +14,10 @@ def get_form_by_id(db: Session, form_id: int):
     return db.query(models.Form).filter(models.Form.id == form_id).first()
 
 def get_form_by_slug(db: Session, slug: str):
-    return db.query(models.Form).filter(models.Form.slug == slug).first()
+    form = db.query(models.Form).filter(models.Form.slug == slug).first()
+    if not form and slug.isdigit():
+        form = db.query(models.Form).filter(models.Form.id == int(slug)).first()
+    return form
 
 def create_form(db: Session, form: schemas.FormCreate, slug: str):
     db_form = models.Form(**form.model_dump(), slug=slug)

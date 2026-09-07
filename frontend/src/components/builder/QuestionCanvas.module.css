@@ -1,0 +1,364 @@
+.canvasArea {
+  flex: 1;
+  background-color: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  overflow-y: auto;
+  min-height: calc(100vh - 54px);
+}
+
+.canvasCard {
+  width: 100%;
+  max-width: 620px;
+  background-color: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 12px;
+  padding: 40px 48px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+.questionHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.questionNumberLabel {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #18181b;
+  margin-top: 4px;
+}
+
+.requiredStar {
+  color: #dc2626;
+}
+
+.titleInput {
+  flex: 1;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #18181b;
+  padding: 4px 6px;
+  border-radius: 6px;
+  line-height: 1.35;
+  transition: all 0.15s ease;
+}
+
+.titleInput:hover {
+  background-color: #f8fafc;
+}
+
+.titleInput:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.04);
+}
+
+.descInput {
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 0.9375rem;
+  color: #71717a;
+  padding: 4px 6px 4px 28px;
+  border-radius: 6px;
+  resize: vertical;
+  line-height: 1.4;
+  margin-bottom: 24px;
+  transition: all 0.15s ease;
+}
+
+.descInput:hover {
+  background-color: #f8fafc;
+}
+
+.descInput:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  color: #27272a;
+}
+
+.inputPreviewArea {
+  margin-bottom: 32px;
+  padding-left: 28px;
+}
+
+.previewFieldWrapper {
+  width: 100%;
+}
+
+.shortTextInput {
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid #e4e4e7;
+  font-size: 1.1rem;
+  color: #18181b;
+  padding: 8px 0;
+  background: transparent;
+  outline: none;
+}
+
+.longTextTextarea {
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid #e4e4e7;
+  font-size: 1.05rem;
+  color: #18181b;
+  padding: 8px 0;
+  background: transparent;
+  resize: none;
+  outline: none;
+}
+
+/* Choices list */
+.choicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.choiceCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  padding: 8px 12px;
+  transition: all 0.15s ease;
+}
+
+.choiceCard:hover {
+  border-color: #cbd5e1;
+  background-color: #ededf0;
+}
+
+.choiceKey {
+  width: 20px;
+  height: 20px;
+  background-color: #ffffff;
+  border: 1px solid #d4d4d8;
+  color: #3f3f46;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.choiceInlineInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.9375rem;
+  color: #18181b;
+  outline: none;
+}
+
+.choiceDeleteBtn {
+  color: #a1a1aa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  transition: all 0.15s;
+}
+
+.choiceDeleteBtn:hover {
+  color: #dc2626;
+  background-color: #fee2e2;
+}
+
+.addChoiceBtn {
+  align-self: flex-start;
+  color: #2563eb;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+  transition: all 0.15s;
+}
+
+.addChoiceBtn:hover {
+  background-color: #eff6ff;
+}
+
+/* Dropdown */
+.dropdownWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dropdownSelector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #71717a;
+  background-color: #ffffff;
+}
+
+.dropdownOptionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f4f4f5;
+}
+
+.dropdownListTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #71717a;
+  text-transform: uppercase;
+}
+
+/* Yes / No */
+.yesNoGroup {
+  display: flex;
+  gap: 12px;
+}
+
+.yesNoButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background-color: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #18181b;
+}
+
+/* Rating */
+.ratingRow {
+  display: flex;
+  gap: 8px;
+}
+
+.ratingBtn {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e4e4e7;
+  background-color: #ffffff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #18181b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* OK Button Mock */
+.bottomOkRow {
+  padding-left: 28px;
+}
+
+.okButtonMock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #18181b;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.okCheck {
+  font-size: 0.9rem;
+}
+
+/* Thank you card */
+.thankYouIcon {
+  font-size: 2.8rem;
+  margin-bottom: 12px;
+}
+
+.previewBtnRow {
+  margin-top: 24px;
+}
+
+.createAnotherPill {
+  display: inline-block;
+  background-color: #f4f4f5;
+  color: #71717a;
+  font-size: 0.8125rem;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+/* Empty State */
+.emptyCard {
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 64px 32px;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #18181b;
+  margin-bottom: 8px;
+}
+
+.emptySubtitle {
+  font-size: 0.9375rem;
+  color: #71717a;
+  margin-bottom: 24px;
+}
+
+.emptyAddBtn {
+  background-color: #18181b;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 10px 24px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.emptyAddBtn:hover {
+  background-color: #000000;
+}
+
+@media (max-width: 768px) {
+  .canvasCard {
+    padding: 24px 18px;
+  }
+  .inputPreviewArea {
+    padding-left: 0;
+  }
+}

@@ -1,0 +1,56 @@
+.pageContainer {
+  min-height: 100vh;
+  background-color: #fcfcfc;
+  display: flex;
+  flex-direction: column;
+  color: #18181b;
+}
+
+.layoutBody {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 106px);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 32px 36px 64px 36px;
+  background-color: #fcfcfc;
+  overflow-y: auto;
+  max-width: calc(100vw - 240px);
+}
+
+.contentContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.loadingSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonRow {
+  height: 52px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .mainContent {
+    max-width: 100vw;
+    padding: 20px 16px 40px 16px;
+  }
+}

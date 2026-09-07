@@ -1,0 +1,174 @@
+.navSidebar {
+  width: 260px;
+  min-width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid #eef0f2;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 54px);
+  position: sticky;
+  top: 54px;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.sidebarHeader {
+  margin-bottom: 12px;
+}
+
+.addContentBtn {
+  width: 100%;
+  background-color: #f4f4f5;
+  color: #18181b;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  border: 1px dashed #d4d4d8;
+}
+
+.addContentBtn:hover {
+  background-color: #e4e4e7;
+  border-color: #a1a1aa;
+}
+
+.plusIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.questionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.navItem:hover {
+  background-color: #f9fafb;
+}
+
+.navItemActive {
+  background-color: #f4f4f5;
+  border-color: #e4e4e7;
+}
+
+.itemLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.dragHandle {
+  color: #a1a1aa;
+  cursor: grab;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.badgeIcon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.badgeNumber {
+  line-height: 1;
+}
+
+.itemInfo {
+  min-width: 0;
+  flex: 1;
+}
+
+.itemTitle {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #27272a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.requiredStar {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.deleteBtn {
+  color: #a1a1aa;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.navItem:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.navItemOverlay {
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.endingsSection {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #f4f4f5;
+}
+
+.endingsHeader {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #71717a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  padding-left: 4px;
+}

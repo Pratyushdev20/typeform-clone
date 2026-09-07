@@ -1,0 +1,96 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 16px;
+  padding: 80px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.iconContainer {
+  width: 52px;
+  height: 52px;
+  background-color: #e6f7f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #18181b;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  font-size: 0.9375rem;
+  color: #52525b;
+  max-width: 560px;
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.upgradeBtn {
+  background-color: #0f5b4f;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.upgradeBtn:hover {
+  background-color: #0b453c;
+  transform: translateY(-1px);
+}
+
+.learnMoreBtn {
+  background-color: #ffffff;
+  color: #3f3f46;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 6px;
+  border: 1px solid #d4d4d8;
+  transition: all 0.15s ease;
+}
+
+.learnMoreBtn:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.plansNotice {
+  font-size: 0.75rem;
+  color: #0f766e;
+  max-width: 500px;
+  line-height: 1.4;
+  margin: 0;
+}

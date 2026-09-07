@@ -1,0 +1,135 @@
+.row {
+  display: grid;
+  grid-template-columns: 1fr 110px 110px 130px 90px 50px;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f4f4f5;
+  transition: background-color 0.15s ease;
+}
+
+.row:hover {
+  background-color: #fafafa;
+}
+
+.nameCol {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.nameLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.formIconThumbnail {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.titleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.formTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #18181b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.nameLink:hover .formTitle {
+  color: #0284c7;
+}
+
+.statusBadge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badgeDraft {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.badgePublished {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.metaCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.metaText {
+  font-size: 0.8125rem;
+  color: #71717a;
+  font-weight: 400;
+}
+
+.dateText {
+  font-size: 0.8125rem;
+  color: #71717a;
+  font-weight: 400;
+}
+
+.integrationsCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.integrationsIconBtn {
+  color: #71717a;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.integrationsIconBtn:hover {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.actionsCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .row {
+    grid-template-columns: 1fr 80px 40px;
+  }
+  .metaCol:nth-child(3),
+  .metaCol:nth-child(4),
+  .integrationsCol {
+    display: none;
+  }
+}
