@@ -57,6 +57,19 @@ class Question(Base):
     form = relationship("Form", back_populates="questions")
     options = relationship("QuestionOption", back_populates="question", cascade="all, delete-orphan")
     answers = relationship("Answer", back_populates="question", cascade="all, delete-orphan")
+    logic_rules = relationship("LogicRule", foreign_keys="LogicRule.question_id", back_populates="question", cascade="all, delete-orphan")
+
+class LogicRule(Base):
+    __tablename__ = "logic_rules"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False, index=True)
+    condition_value = Column(String, nullable=False)
+    action = Column(String, nullable=False, default="jump")  # "jump" | "end" | "next"
+    destination_question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=True)
+    
+    question = relationship("Question", foreign_keys=[question_id], back_populates="logic_rules")
+    destination_question = relationship("Question", foreign_keys=[destination_question_id])
 
 class QuestionOption(Base):
     __tablename__ = "question_options"

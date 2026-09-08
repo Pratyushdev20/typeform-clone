@@ -89,6 +89,7 @@ def duplicate_form(db: Session, form_id: int, user_id: Optional[int] = None):
     db.refresh(new_form)
     
     sorted_questions = sorted(original_form.questions, key=lambda q: q.order_index)
+    old_to_new_qid = {}
     for q in sorted_questions:
         new_question = models.Question(
             form_id=new_form.id,
@@ -101,6 +102,7 @@ def duplicate_form(db: Session, form_id: int, user_id: Optional[int] = None):
         db.add(new_question)
         db.commit()
         db.refresh(new_question)
+        old_to_new_qid[q.id] = new_question.id
         
         sorted_options = sorted(q.options, key=lambda opt: opt.order_index)
         for opt in sorted_options:
@@ -111,6 +113,22 @@ def duplicate_form(db: Session, form_id: int, user_id: Optional[int] = None):
             )
             db.add(new_opt)
         db.commit()
+
+    # Duplicate logic rules mapping destination questions
+    for q in sorted_questions:
+        new_qid = old_to_new_qid.get(q.id)
+        if not new_qid:
+            continue
+        for rule in q.logic_rules:
+            dest_qid = old_to_new_qid.get(rule.destination_question_id) if rule.destination_question_id else None
+            db_rule = models.LogicRule(
+                question_id=new_qid,
+                condition_value=rule.condition_value,
+                action=rule.action,
+                destination_question_id=dest_qid
+            )
+            db.add(db_rule)
+    db.commit()
         
     db.refresh(new_form)
     return new_form
@@ -143,8 +161,23 @@ def create_question(db: Session, form_id: int, question: schemas.QuestionCreate)
             )
             db.add(db_opt)
         db.commit()
-        db.refresh(db_question)
+
+    if question.logic_rules:
+        for rule in question.logic_rules:
+            # Validate destination question
+            dest_id = rule.destination_question_id
+            if dest_id == db_question.id:
+                dest_id = None
+            db_rule = models.LogicRule(
+                question_id=db_question.id,
+                condition_value=rule.condition_value,
+                action=rule.action,
+                destination_question_id=dest_id
+            )
+            db.add(db_rule)
+        db.commit()
         
+    db.refresh(db_question)
     return db_question
 
 def update_question(db: Session, question_id: int, question_update: schemas.QuestionUpdate):
@@ -169,6 +202,38 @@ def update_question(db: Session, question_id: int, question_update: schemas.Ques
                 order_index=ord_idx
             )
             db.add(db_opt)
+
+    if "logic_rules" in update_data and update_data["logic_rules"] is not None:
+        db.query(models.LogicRule).filter(models.LogicRule.question_id == question_id).delete()
+        # Find all valid sibling question IDs in the same form
+        valid_dest_ids = {
+            q.id for q in db.query(models.Question.id).filter(
+                models.Question.form_id == db_question.form_id,
+                models.Question.id != question_id
+            ).all()
+        }
+        
+        for rule in question_update.logic_rules:
+            action = rule.action if hasattr(rule, "action") else "jump"
+            dest_id = rule.destination_question_id if hasattr(rule, "destination_question_id") else None
+            cond_val = rule.condition_value if hasattr(rule, "condition_value") else ""
+
+            # Check rule validity
+            if action == "jump":
+                if dest_id is None or dest_id not in valid_dest_ids:
+                    # If invalid destination, default to "next"
+                    action = "next"
+                    dest_id = None
+            elif action in ["end", "next"]:
+                dest_id = None
+
+            db_rule = models.LogicRule(
+                question_id=db_question.id,
+                condition_value=str(cond_val),
+                action=action,
+                destination_question_id=dest_id
+            )
+            db.add(db_rule)
             
     db.commit()
     db.refresh(db_question)

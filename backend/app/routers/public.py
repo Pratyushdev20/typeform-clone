@@ -22,6 +22,8 @@ def validate_submission(form: models.Form, response_in: schemas.ResponseCreate):
             )
         answers_by_qid[ans.question_id] = ans
         
+    has_form_branching = any(len(q.logic_rules) > 0 for q in form.questions)
+
     # 2. Validate each question in the form
     for q_id, q in questions_by_id.items():
         ans = answers_by_qid.get(q_id)
@@ -36,11 +38,17 @@ def validate_submission(form: models.Form, response_in: schemas.ResponseCreate):
                 has_value = True
                 
         # Required question check
-        if q.is_required and not has_value:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Question '{q.title}' is required."
-            )
+        if q.is_required:
+            if not has_form_branching and not has_value:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Question '{q.title}' is required."
+                )
+            elif has_form_branching and q_id in answers_by_qid and not has_value:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Question '{q.title}' is required."
+                )
             
         if not has_value:
             continue

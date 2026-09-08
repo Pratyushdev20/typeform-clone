@@ -23,6 +23,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
 
   // Flow states: "welcome" | number (0-based index of question) | "thank_you"
   const [currentStep, setCurrentStep] = useState<"welcome" | number | "thank_you">("welcome");
+  const [historyStack, setHistoryStack] = useState<number[]>([]);
   const [answers, setAnswers] = useState<Record<number, AnswerState>>({});
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,8 +95,8 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
   };
 
   // Client-side validation for current question
-  const validateCurrentQuestion = (question: Question): boolean => {
-    const ans = getAnswer(question.id);
+  const validateCurrentQuestion = (question: Question, explicitAns?: AnswerState): boolean => {
+    const ans = explicitAns || getAnswer(question.id);
     const hasText = ans.text_value !== undefined && ans.text_value.trim() !== "";
     const hasNumber = ans.number_value !== undefined && !isNaN(ans.number_value);
     const hasBool = ans.boolean_value !== undefined;
@@ -129,12 +130,35 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
     return true;
   };
 
+  // Helper to find matching logic rule based on respondent answer
+  const findMatchingRule = (question: Question, ans: AnswerState) => {
+    if (!question.logic_rules || question.logic_rules.length === 0) return undefined;
+
+    let currentVal = "";
+    if (question.question_type === QuestionType.yes_no) {
+      if (ans.boolean_value === true || ans.text_value?.toLowerCase() === "yes") currentVal = "yes";
+      else if (ans.boolean_value === false || ans.text_value?.toLowerCase() === "no") currentVal = "no";
+    } else if (question.question_type === QuestionType.rating) {
+      if (ans.number_value !== undefined) currentVal = ans.number_value.toString();
+      else if (ans.text_value) currentVal = ans.text_value.trim();
+    } else {
+      currentVal = (ans.text_value || "").trim();
+    }
+
+    if (!currentVal) return undefined;
+
+    return question.logic_rules.find(
+      (rule) => rule.condition_value.trim().toLowerCase() === currentVal.toLowerCase()
+    );
+  };
+
   // Move to Next Question or Submit
-  const handleNext = async () => {
+  const handleNext = async (explicit?: { questionId: number; answer: AnswerState }) => {
     if (!form || !form.questions) return;
 
     if (currentStep === "welcome") {
       if (form.questions.length > 0) {
+        setHistoryStack([]);
         setCurrentStep(0);
       } else {
         setCurrentStep("thank_you");
@@ -144,53 +168,95 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
 
     if (typeof currentStep === "number") {
       const currentQ = form.questions[currentStep];
-      if (!validateCurrentQuestion(currentQ)) {
+      const currentAns =
+        explicit && explicit.questionId === currentQ.id
+          ? explicit.answer
+          : getAnswer(currentQ.id);
+
+      if (!validateCurrentQuestion(currentQ, currentAns)) {
         return;
       }
 
+      // Check conditional logic rule
+      const rule = findMatchingRule(currentQ, currentAns);
+
+      if (rule) {
+        if (rule.action === "end") {
+          await handleSubmit(currentQ.id, currentAns);
+          return;
+        }
+
+        if (rule.action === "jump" && rule.destination_question_id) {
+          const destIdx = form.questions.findIndex(
+            (q) => q.id === rule.destination_question_id
+          );
+          if (destIdx !== -1 && destIdx !== currentStep) {
+            setHistoryStack((prev) => [...prev, currentStep]);
+            setCurrentStep(destIdx);
+            return;
+          }
+        }
+      }
+
+      // Default progression
       if (currentStep < form.questions.length - 1) {
+        setHistoryStack((prev) => [...prev, currentStep]);
         setCurrentStep(currentStep + 1);
       } else {
-        await handleSubmit();
+        await handleSubmit(currentQ.id, currentAns);
       }
     }
   };
 
-  // Move to Previous Question
+  // Move to Previous Question (following the history stack)
   const handlePrev = () => {
     if (!form || !form.questions) return;
     if (typeof currentStep === "number") {
-      if (currentStep > 0) {
-        setCurrentStep(currentStep - 1);
+      if (historyStack.length > 0) {
+        const prevIndex = historyStack[historyStack.length - 1];
+        setHistoryStack((prev) => prev.slice(0, -1));
+        setCurrentStep(prevIndex);
       } else {
         setCurrentStep("welcome");
       }
     }
   };
 
-  // Submit all responses to backend
-  const handleSubmit = async () => {
+  // Submit responses to backend (submitting only answered questions)
+  const handleSubmit = async (lastQId?: number, lastAns?: AnswerState) => {
     if (!form || !form.questions) return;
 
     try {
       setIsSubmitting(true);
       setSubmitError(null);
 
-      const payload = {
-        answers: form.questions.map((q) => {
-          const ans = getAnswer(q.id);
+      const mergedAnswers = {
+        ...answers,
+        ...(lastQId && lastAns ? { [lastQId]: lastAns } : {}),
+      };
+
+      const payloadAnswers = form.questions
+        .filter((q) => {
+          const ans = mergedAnswers[q.id];
+          if (!ans) return false;
+          const hasText = ans.text_value !== undefined && ans.text_value !== null && ans.text_value.trim() !== "";
+          const hasNumber = ans.number_value !== undefined && ans.number_value !== null && !isNaN(ans.number_value);
+          const hasBool = ans.boolean_value !== undefined && ans.boolean_value !== null;
+          return hasText || hasNumber || hasBool;
+        })
+        .map((q) => {
+          const ans = mergedAnswers[q.id];
           return {
             question_id: q.id,
             text_value: ans.text_value ?? null,
             number_value: ans.number_value ?? null,
             boolean_value: ans.boolean_value ?? null,
           };
-        }),
-      };
+        });
 
       await fetcher(`/public/forms/${slug}/responses`, {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ answers: payloadAnswers }),
       });
 
       setCurrentStep("thank_you");
@@ -250,8 +316,9 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
             const optIndex = charCode - 65;
             if (optIndex >= 0 && optIndex < currentQ.options.length) {
               const selectedOpt = currentQ.options[optIndex];
-              updateAnswer(currentQ.id, { text_value: selectedOpt.value });
-              setTimeout(() => handleNext(), 150);
+              const updatedAns = { text_value: selectedOpt.value };
+              updateAnswer(currentQ.id, updatedAns);
+              setTimeout(() => handleNext({ questionId: currentQ.id, answer: updatedAns }), 150);
             }
           }
         }
@@ -259,11 +326,13 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
         // Yes / No hotkeys (Y / N)
         if (currentQ.question_type === QuestionType.yes_no) {
           if (e.key.toLowerCase() === "y") {
-            updateAnswer(currentQ.id, { boolean_value: true, text_value: "yes" });
-            setTimeout(() => handleNext(), 150);
+            const updatedAns = { boolean_value: true, text_value: "yes" };
+            updateAnswer(currentQ.id, updatedAns);
+            setTimeout(() => handleNext({ questionId: currentQ.id, answer: updatedAns }), 150);
           } else if (e.key.toLowerCase() === "n") {
-            updateAnswer(currentQ.id, { boolean_value: false, text_value: "no" });
-            setTimeout(() => handleNext(), 150);
+            const updatedAns = { boolean_value: false, text_value: "no" };
+            updateAnswer(currentQ.id, updatedAns);
+            setTimeout(() => handleNext({ questionId: currentQ.id, answer: updatedAns }), 150);
           }
         }
 
@@ -271,8 +340,9 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
         if (currentQ.question_type === QuestionType.rating) {
           const num = parseInt(e.key, 10);
           if (!isNaN(num) && num >= 1 && num <= 10) {
-            updateAnswer(currentQ.id, { number_value: num, text_value: num.toString() });
-            setTimeout(() => handleNext(), 150);
+            const updatedAns = { number_value: num, text_value: num.toString() };
+            updateAnswer(currentQ.id, updatedAns);
+            setTimeout(() => handleNext({ questionId: currentQ.id, answer: updatedAns }), 150);
           }
         }
       }
@@ -358,7 +428,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
               <button
                 type="button"
                 className={styles.getStartedBtn}
-                onClick={handleNext}
+                onClick={() => handleNext()}
                 autoFocus
               >
                 Get Started
@@ -477,8 +547,16 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
                               isSelected ? styles.choiceCardSelected : ""
                             }`}
                             onClick={() => {
-                              updateAnswer(q.id, { text_value: opt.value });
-                              setTimeout(() => handleNext(), 150);
+                              const updated = { text_value: opt.value };
+                              updateAnswer(q.id, updated);
+                              setTimeout(
+                                () =>
+                                  handleNext({
+                                    questionId: q.id,
+                                    answer: { ...ans, ...updated },
+                                  }),
+                                150
+                              );
                             }}
                           >
                             <span className={styles.keyBadge}>{keyLetter}</span>
@@ -495,7 +573,9 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
                       className={styles.selectInput}
                       value={ans.text_value || ""}
                       onChange={(e) => {
-                        updateAnswer(q.id, { text_value: e.target.value });
+                        const val = e.target.value;
+                        const updated = { text_value: val };
+                        updateAnswer(q.id, updated);
                       }}
                     >
                       <option value="">Select an option...</option>
@@ -516,8 +596,16 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
                           ans.boolean_value === true ? styles.yesNoBtnSelected : ""
                         }`}
                         onClick={() => {
-                          updateAnswer(q.id, { boolean_value: true, text_value: "yes" });
-                          setTimeout(() => handleNext(), 150);
+                          const updated = { boolean_value: true, text_value: "yes" };
+                          updateAnswer(q.id, updated);
+                          setTimeout(
+                            () =>
+                              handleNext({
+                                questionId: q.id,
+                                answer: { ...ans, ...updated },
+                              }),
+                            150
+                          );
                         }}
                       >
                         <span className={styles.keyBadge}>Y</span>
@@ -529,8 +617,16 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
                           ans.boolean_value === false ? styles.yesNoBtnSelected : ""
                         }`}
                         onClick={() => {
-                          updateAnswer(q.id, { boolean_value: false, text_value: "no" });
-                          setTimeout(() => handleNext(), 150);
+                          const updated = { boolean_value: false, text_value: "no" };
+                          updateAnswer(q.id, updated);
+                          setTimeout(
+                            () =>
+                              handleNext({
+                                questionId: q.id,
+                                answer: { ...ans, ...updated },
+                              }),
+                            150
+                          );
                         }}
                       >
                         <span className={styles.keyBadge}>N</span>
@@ -552,11 +648,19 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
                               isSelected ? styles.ratingBtnSelected : ""
                             }`}
                             onClick={() => {
-                              updateAnswer(q.id, {
+                              const updated = {
                                 number_value: num,
                                 text_value: num.toString(),
-                              });
-                              setTimeout(() => handleNext(), 150);
+                              };
+                              updateAnswer(q.id, updated);
+                              setTimeout(
+                                () =>
+                                  handleNext({
+                                    questionId: q.id,
+                                    answer: { ...ans, ...updated },
+                                  }),
+                                150
+                              );
                             }}
                           >
                             {num}
@@ -584,7 +688,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
                   <button
                     type="button"
                     className={styles.okBtn}
-                    onClick={handleNext}
+                    onClick={() => handleNext()}
                     disabled={isSubmitting}
                   >
                     {isSubmitting
@@ -654,7 +758,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
           <button
             type="button"
             className={styles.navChevronBtn}
-            onClick={handleNext}
+            onClick={() => handleNext()}
             disabled={currentStep === "thank_you" || isSubmitting}
             title="Next question (Down arrow)"
             aria-label="Next question"

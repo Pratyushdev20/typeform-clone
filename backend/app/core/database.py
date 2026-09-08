@@ -30,6 +30,21 @@ def init_db():
                 columns = [row[1] for row in cursor.fetchall()]
                 if "user_id" not in columns and len(columns) > 0:
                     cursor.execute("ALTER TABLE forms ADD COLUMN user_id INTEGER REFERENCES users(id)")
+                
+                # Ensure logic_rules table exists
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS logic_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        question_id INTEGER NOT NULL,
+                        condition_value VARCHAR NOT NULL,
+                        action VARCHAR NOT NULL DEFAULT 'jump',
+                        destination_question_id INTEGER,
+                        FOREIGN KEY(question_id) REFERENCES questions(id) ON DELETE CASCADE,
+                        FOREIGN KEY(destination_question_id) REFERENCES questions(id) ON DELETE CASCADE
+                    )
+                """)
+                cursor.execute("CREATE INDEX IF NOT EXISTS ix_logic_rules_question_id ON logic_rules (question_id)")
+                cursor.execute("CREATE INDEX IF NOT EXISTS ix_logic_rules_id ON logic_rules (id)")
         except Exception as e:
             pass
 

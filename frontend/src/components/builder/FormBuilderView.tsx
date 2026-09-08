@@ -30,9 +30,6 @@ export const FormBuilderView: React.FC = () => {
   // Selected item: number (question ID) or "thank_you" or "form_settings"
   const [selectedId, setSelectedId] = useState<number | "thank_you" | "form_settings">(0);
 
-  // Active question state
-  const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
-
   // Form settings state
   const [formTitle, setFormTitle] = useState("");
   const [thankYouTitle, setThankYouTitle] = useState("Thank you!");
@@ -59,10 +56,8 @@ export const FormBuilderView: React.FC = () => {
 
       if (data.questions && data.questions.length > 0) {
         setSelectedId(data.questions[0].id);
-        setActiveQuestion({ ...data.questions[0] });
       } else {
         setSelectedId("thank_you");
-        setActiveQuestion(null);
       }
     } catch (err: any) {
       console.error("Failed to load form:", err);
@@ -76,20 +71,25 @@ export const FormBuilderView: React.FC = () => {
     loadForm();
   }, [loadForm]);
 
-  // Sync activeQuestion whenever selectedId or form.questions changes
-  useEffect(() => {
-    if (typeof selectedId === "number" && form?.questions) {
-      const q = form.questions.find((item) => item.id === selectedId);
-      if (q) {
-        setActiveQuestion({
-          ...q,
-          options: q.options ? [...q.options] : [],
-        });
-      }
-    } else {
-      setActiveQuestion(null);
-    }
-  }, [selectedId, form]);
+  // Derive active question safely
+  const activeQuestion: Question | null = React.useMemo(() => {
+    if (!form?.questions || form.questions.length === 0) return null;
+    if (selectedId === "thank_you" || selectedId === "form_settings") return null;
+    const found = form.questions.find((q) => Number(q.id) === Number(selectedId));
+    return found || form.questions[0] || null;
+  }, [form?.questions, selectedId]);
+
+  const effectiveSelectedId =
+    selectedId === "thank_you" || selectedId === "form_settings"
+      ? selectedId
+      : activeQuestion
+      ? activeQuestion.id
+      : (form?.questions && form.questions.length > 0 ? form.questions[0].id : "thank_you");
+
+  const currentQIndex =
+    form?.questions && typeof effectiveSelectedId === "number"
+      ? Math.max(0, form.questions.findIndex((q) => Number(q.id) === Number(effectiveSelectedId)))
+      : 0;
 
   const triggerSaveIndicator = () => {
     setSaveSuccess(true);
@@ -213,7 +213,6 @@ export const FormBuilderView: React.FC = () => {
       const updatedQuestions = [...(form.questions || []), newQuestion];
       setForm({ ...form, questions: updatedQuestions });
       setSelectedId(newQuestion.id);
-      setActiveQuestion(newQuestion);
       triggerSaveIndicator();
       showToast(`Added ${config.label} question`, "success");
     } finally {
@@ -240,6 +239,14 @@ export const FormBuilderView: React.FC = () => {
                 order_index: idx,
               }))
             : [],
+          logic_rules: q.logic_rules
+            ? q.logic_rules.map((rule) => ({
+                id: rule.id || undefined,
+                condition_value: rule.condition_value,
+                action: rule.action,
+                destination_question_id: rule.destination_question_id || null,
+              }))
+            : [],
         }),
       });
 
@@ -257,19 +264,19 @@ export const FormBuilderView: React.FC = () => {
   };
 
   const handleQuestionChange = (updated: Question) => {
-    setActiveQuestion(updated);
-    // Optimistically update list title
-    if (form?.questions) {
-      setForm({
-        ...form,
-        questions: form.questions.map((q) => (q.id === updated.id ? updated : q)),
-      });
-    }
+    // Optimistically update list title in sidebar and state
+    setForm((prev) => {
+      if (!prev || !prev.questions) return prev;
+      return {
+        ...prev,
+        questions: prev.questions.map((q) => (q.id === updated.id ? updated : q)),
+      };
+    });
 
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       saveQuestionToBackend(updated);
-    }, 800);
+    }, 600);
   };
 
   const handleQuestionBlur = () => {
@@ -292,7 +299,17 @@ export const FormBuilderView: React.FC = () => {
         console.warn("Backend delete question failed, removing locally", err);
       }
 
-      const updatedList = (form.questions || []).filter((q) => q.id !== questionId);
+      const updatedList = (form.questions || [])
+        .filter((q) => q.id !== questionId)
+        .map((q) => {
+          if (!q.logic_rules || q.logic_rules.length === 0) return q;
+          const cleanedRules = q.logic_rules.map((r) =>
+            r.destination_question_id === questionId
+              ? { ...r, action: "next" as const, destination_question_id: null }
+              : r
+          );
+          return { ...q, logic_rules: cleanedRules };
+        });
       setForm({ ...form, questions: updatedList });
 
       if (selectedId === questionId) {
@@ -320,127 +337,130 @@ export const FormBuilderView: React.FC = () => {
 
     try {
       setSaving(true);
-      const question_ids = reordered.map((q) => q.id);
       await fetcher(`/forms/${form.id}/questions/reorder`, {
         method: "PUT",
-        body: JSON.stringify({ question_ids }),
+        body: JSON.stringify({
+          question_ids: reordered.map((q) => q.id),
+        }),
       });
       triggerSaveIndicator();
     } catch (err) {
-      console.warn("Backend reorder failed, preserving locally", err);
-      triggerSaveIndicator();
+      console.warn("Backend reorder failed, reverting", err);
+      setForm({ ...form, questions: previous });
+      showToast("Failed to reorder questions", "error");
     } finally {
       setSaving(false);
     }
   };
 
-  // 7. Question Type Change
   const handleQuestionTypeChange = (newType: QuestionType) => {
     if (!activeQuestion) return;
-    const cfg = QUESTION_TYPE_CONFIGS[newType];
-    let newOpts = activeQuestion.options || [];
+    const isNewChoice =
+      newType === QuestionType.multiple_choice || newType === QuestionType.dropdown;
 
-    if (
-      (newType === QuestionType.multiple_choice || newType === QuestionType.dropdown) &&
-      newOpts.length === 0
-    ) {
-      newOpts = [
+    let updatedOptions = activeQuestion.options;
+    if (isNewChoice && (!updatedOptions || updatedOptions.length === 0)) {
+      updatedOptions = [
         { id: 0, question_id: activeQuestion.id, value: "Option 1", order_index: 0 },
         { id: 0, question_id: activeQuestion.id, value: "Option 2", order_index: 1 },
       ];
     }
 
+    // Reset logic rules if changing to an incompatible type
+    const supportsLogic =
+      newType === QuestionType.multiple_choice ||
+      newType === QuestionType.dropdown ||
+      newType === QuestionType.yes_no ||
+      newType === QuestionType.rating;
+
     const updated: Question = {
       ...activeQuestion,
       question_type: newType,
-      options: newOpts,
+      options: updatedOptions,
+      logic_rules: supportsLogic ? activeQuestion.logic_rules : [],
     };
-    setActiveQuestion(updated);
-    saveQuestionToBackend(updated);
+    handleQuestionChange(updated);
   };
 
-  // 8. Options Handlers
   const handleAddOption = () => {
     if (!activeQuestion) return;
-    const current = activeQuestion.options || [];
+    const currentOptions = activeQuestion.options || [];
+    const newIndex = currentOptions.length;
     const newOpt: QuestionOption = {
       id: 0,
       question_id: activeQuestion.id,
-      value: `Option ${current.length + 1}`,
-      order_index: current.length,
+      value: `Option ${newIndex + 1}`,
+      order_index: newIndex,
     };
-    const updated = { ...activeQuestion, options: [...current, newOpt] };
-    setActiveQuestion(updated);
-    saveQuestionToBackend(updated);
+    const updated = {
+      ...activeQuestion,
+      options: [...currentOptions, newOpt],
+    };
+    handleQuestionChange(updated);
   };
 
-  const handleUpdateOption = (index: number, val: string) => {
+  const handleUpdateOption = (index: number, value: string) => {
     if (!activeQuestion || !activeQuestion.options) return;
-    const opts = [...activeQuestion.options];
-    opts[index] = { ...opts[index], value: val };
-    const updated = { ...activeQuestion, options: opts };
-    setActiveQuestion(updated);
+    const updatedOptions = activeQuestion.options.map((opt, idx) =>
+      idx === index ? { ...opt, value } : opt
+    );
+    const updated = { ...activeQuestion, options: updatedOptions };
+    handleQuestionChange(updated);
   };
 
   const handleDeleteOption = (index: number) => {
     if (!activeQuestion || !activeQuestion.options) return;
-    if (activeQuestion.options.length <= 1) {
-      alert("Multiple choice and dropdown questions must have at least one choice.");
-      return;
-    }
-    const opts = activeQuestion.options.filter((_, idx) => idx !== index);
-    const updated = { ...activeQuestion, options: opts };
-    setActiveQuestion(updated);
-    saveQuestionToBackend(updated);
+    const updatedOptions = activeQuestion.options.filter((_, idx) => idx !== index);
+    const updated = { ...activeQuestion, options: updatedOptions };
+    handleQuestionChange(updated);
   };
+
 
   if (loading) {
     return (
-      <div className={styles.centerFeedbackContainer}>
-        <div className={styles.loadingSpinner} />
-        <h2 className={styles.feedbackTitle}>Loading form builder...</h2>
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner} />
+        <p>Loading form builder...</p>
       </div>
     );
   }
 
   if (error || !form) {
     return (
-      <div className={styles.centerFeedbackContainer}>
-        <div className={styles.errorIcon}>⚠</div>
-        <h2 className={styles.feedbackTitle}>Error loading form</h2>
-        <p className={styles.errorDesc}>{error || "Form not found"}</p>
-        <button className={styles.backHomeBtn} onClick={() => router.push("/dashboard")}>
-          ← Back to workspace
+      <div className={styles.loadingContainer}>
+        <h2>Error Loading Form</h2>
+        <p>{error || "Form could not be found."}</p>
+        <button
+          type="button"
+          className={styles.retryBtn}
+          onClick={() => router.push("/dashboard")}
+        >
+          Back to Workspace
         </button>
       </div>
     );
   }
 
-  const currentQIndex =
-    form.questions && typeof selectedId === "number"
-      ? form.questions.findIndex((q) => q.id === selectedId)
-      : 0;
-
   return (
-    <div className={styles.builderContainer}>
-      {/* 1. Header Bar */}
+    <div className={styles.builderLayout}>
+      {/* 1. Header Toolbar */}
       <BuilderHeader
         form={form}
         formTitle={formTitle}
-        onTitleChange={setFormTitle}
-        onTitleSave={handleSaveFormTitle}
         saving={saving}
         saveSuccess={saveSuccess}
+        onTitleChange={setFormTitle}
+        onTitleSave={handleSaveFormTitle}
         onTogglePublish={handleTogglePublish}
         onOpenPreview={() => setIsPreviewOpen(true)}
       />
 
-      {/* 2. Main 3-Column Workspace */}
-      <div className={styles.workspaceBody}>
+      {/* 2. Three-column Workspace Body */}
+      <div className={styles.builderBody}>
         {/* Left: Question Navigation Sidebar */}
         <QuestionNav
           questions={form.questions || []}
-          selectedId={selectedId}
+          selectedId={effectiveSelectedId}
           onSelect={(id) => setSelectedId(id)}
           onAddQuestion={() => setIsTypePickerOpen(true)}
           onDeleteQuestion={(id) => handleDeleteQuestion(id)}
@@ -449,7 +469,7 @@ export const FormBuilderView: React.FC = () => {
 
         {/* Center: Main Question Editor Canvas */}
         <QuestionCanvas
-          selectedId={selectedId}
+          selectedId={effectiveSelectedId}
           questionIndex={currentQIndex}
           activeQuestion={activeQuestion}
           onQuestionChange={handleQuestionChange}
@@ -468,20 +488,26 @@ export const FormBuilderView: React.FC = () => {
 
         {/* Right: Question Properties Panel */}
         <QuestionSettings
-          selectedId={selectedId}
+          selectedId={effectiveSelectedId}
           activeQuestion={activeQuestion}
+          allQuestions={form.questions || []}
+          onTitleChange={(val) => {
+            if (activeQuestion) {
+              const updated = { ...activeQuestion, title: val };
+              handleQuestionChange(updated);
+            }
+          }}
           onTypeChange={handleQuestionTypeChange}
           onRequiredToggle={(val) => {
             if (activeQuestion) {
               const updated = { ...activeQuestion, is_required: val };
-              setActiveQuestion(updated);
-              saveQuestionToBackend(updated);
+              handleQuestionChange(updated);
             }
           }}
           onDescriptionChange={(val) => {
             if (activeQuestion) {
               const updated = { ...activeQuestion, description: val };
-              setActiveQuestion(updated);
+              handleQuestionChange(updated);
             }
           }}
           onBlur={handleQuestionBlur}
@@ -489,6 +515,12 @@ export const FormBuilderView: React.FC = () => {
           onAddOption={handleAddOption}
           onUpdateOption={handleUpdateOption}
           onDeleteOption={handleDeleteOption}
+          onUpdateLogicRules={(rules) => {
+            if (activeQuestion) {
+              const updated = { ...activeQuestion, logic_rules: rules };
+              handleQuestionChange(updated);
+            }
+          }}
         />
       </div>
 

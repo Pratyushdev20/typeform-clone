@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Question, QuestionType, QuestionOption } from "../../types";
+import { QUESTION_TYPE_CONFIGS } from "./builderTypes";
 import styles from "./QuestionCanvas.module.css";
 
 interface QuestionCanvasProps {
@@ -63,22 +64,28 @@ export const QuestionCanvas: React.FC<QuestionCanvasProps> = ({
       <section className={styles.canvasArea}>
         <div className={styles.canvasCard}>
           <div className={styles.thankYouIcon}>🎉</div>
-          <input
-            type="text"
-            className={styles.titleInput}
-            value={thankYouTitle}
-            onChange={(e) => onThankYouTitleChange(e.target.value)}
-            onBlur={onThankYouBlur}
-            placeholder="Thank you!"
-          />
-          <textarea
-            className={styles.descInput}
-            value={thankYouMessage}
-            onChange={(e) => onThankYouMessageChange(e.target.value)}
-            onBlur={onThankYouBlur}
-            placeholder="Your submission has been received."
-            rows={2}
-          />
+          <div className={styles.editorSection}>
+            <label className={styles.fieldLabel}>Thank You Headline</label>
+            <input
+              type="text"
+              className={styles.titleInput}
+              value={thankYouTitle}
+              onChange={(e) => onThankYouTitleChange(e.target.value)}
+              onBlur={onThankYouBlur}
+              placeholder="Thank you!"
+            />
+          </div>
+          <div className={styles.editorSection}>
+            <label className={styles.fieldLabel}>Thank You Message</label>
+            <textarea
+              className={styles.descInput}
+              value={thankYouMessage}
+              onChange={(e) => onThankYouMessageChange(e.target.value)}
+              onBlur={onThankYouBlur}
+              placeholder="Your submission has been received."
+              rows={2}
+            />
+          </div>
           <div className={styles.previewBtnRow}>
             <div className={styles.createAnotherPill}>Create a typeform</div>
           </div>
@@ -90,40 +97,60 @@ export const QuestionCanvas: React.FC<QuestionCanvasProps> = ({
   // 3. Question Canvas
   if (!activeQuestion) return null;
 
+  const currentConfig = QUESTION_TYPE_CONFIGS[activeQuestion.question_type] || {
+    icon: "❓",
+    label: activeQuestion.question_type,
+  };
+
   return (
     <section className={styles.canvasArea}>
       <div className={styles.canvasCard}>
-        {/* Question Header: Number + Asterisk + Title */}
-        <div className={styles.questionHeaderRow}>
-          <span className={styles.questionNumberLabel}>
-            {questionIndex + 1}
-            {activeQuestion.is_required && (
-              <span className={styles.requiredStar}> *</span>
-            )}
-          </span>
-          <input
-            type="text"
+        {/* Top Meta Header: Question Number + Type Badge + Required Indicator */}
+        <div className={styles.topMetaRow}>
+          <div className={styles.metaLeft}>
+            <span className={styles.questionBadge}>{questionIndex + 1}</span>
+            <span className={styles.typePill}>
+              <span>{currentConfig.icon}</span>
+              <span>{currentConfig.label}</span>
+            </span>
+          </div>
+          {activeQuestion.is_required && (
+            <span className={styles.requiredTag}>* Required</span>
+          )}
+        </div>
+
+        {/* 1. Question Title / Text — REQUIRED */}
+        <div className={styles.editorSection}>
+          <label className={styles.fieldLabel}>
+            <span>Question Title / Text</span>
+            <span style={{ color: "#dc2626" }}>*</span>
+          </label>
+          <textarea
             className={styles.titleInput}
             value={activeQuestion.title}
             onChange={(e) =>
               onQuestionChange({ ...activeQuestion, title: e.target.value })
             }
             onBlur={onQuestionBlur}
-            placeholder="Your question here..."
+            placeholder="e.g. What is your favorite programming language?"
+            rows={2}
           />
         </div>
 
-        {/* Description / Help text */}
-        <textarea
-          className={styles.descInput}
-          value={activeQuestion.description || ""}
-          onChange={(e) =>
-            onQuestionChange({ ...activeQuestion, description: e.target.value })
-          }
-          onBlur={onQuestionBlur}
-          placeholder="Description (optional)"
-          rows={1}
-        />
+        {/* 2. Question Description — OPTIONAL */}
+        <div className={styles.editorSection}>
+          <label className={styles.fieldLabel}>Description (optional)</label>
+          <textarea
+            className={styles.descInput}
+            value={activeQuestion.description || ""}
+            onChange={(e) =>
+              onQuestionChange({ ...activeQuestion, description: e.target.value })
+            }
+            onBlur={onQuestionBlur}
+            placeholder="Add directions, context, or extra details for respondents..."
+            rows={2}
+          />
+        </div>
 
         {/* Live Input Preview for 8 Question Types */}
         <div className={styles.inputPreviewArea}>

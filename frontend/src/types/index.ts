@@ -29,6 +29,14 @@ export interface QuestionOption {
   order_index: number;
 }
 
+export interface LogicRule {
+  id?: number;
+  question_id?: number;
+  condition_value: string;
+  action: "jump" | "end" | "next";
+  destination_question_id?: number | null;
+}
+
 export interface Question {
   id: number;
   form_id: number;
@@ -38,6 +46,7 @@ export interface Question {
   is_required: boolean;
   order_index: number;
   options: QuestionOption[];
+  logic_rules?: LogicRule[];
 }
 
 export interface Form {

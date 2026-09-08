@@ -21,6 +21,25 @@ class QuestionOption(QuestionOptionBase):
     question_id: int
     model_config = ConfigDict(from_attributes=True)
 
+class LogicRuleBase(BaseModel):
+    condition_value: str
+    action: str = "jump"  # "jump" | "end" | "next"
+    destination_question_id: Optional[int] = None
+
+class LogicRuleCreate(LogicRuleBase):
+    pass
+
+class LogicRuleUpdate(BaseModel):
+    id: Optional[int] = None
+    condition_value: str
+    action: str = "jump"
+    destination_question_id: Optional[int] = None
+
+class LogicRule(LogicRuleBase):
+    id: int
+    question_id: int
+    model_config = ConfigDict(from_attributes=True)
+
 class QuestionBase(BaseModel):
     title: str
     description: Optional[str] = None
@@ -30,6 +49,7 @@ class QuestionBase(BaseModel):
 
 class QuestionCreate(QuestionBase):
     options: Optional[List[QuestionOptionCreate]] = []
+    logic_rules: Optional[List[LogicRuleCreate]] = []
 
 class QuestionUpdate(BaseModel):
     title: Optional[str] = None
@@ -38,11 +58,13 @@ class QuestionUpdate(BaseModel):
     is_required: Optional[bool] = None
     order_index: Optional[int] = None
     options: Optional[List[QuestionOptionUpdate]] = None
+    logic_rules: Optional[List[LogicRuleUpdate]] = None
 
 class Question(QuestionBase):
     id: int
     form_id: int
     options: List[QuestionOption] = []
+    logic_rules: List[LogicRule] = []
     model_config = ConfigDict(from_attributes=True)
 
 class UserBase(BaseModel):

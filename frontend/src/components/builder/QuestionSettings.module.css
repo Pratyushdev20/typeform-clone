@@ -193,6 +193,60 @@
   color: #dc2626;
 }
 
+.logicHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.logicBadge {
+  font-size: 0.6875rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.logicCard {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.logicRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logicSubLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.logicCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logicCardTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+}
+
 .deleteSection {
   margin-top: auto;
   padding-top: 16px;

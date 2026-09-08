@@ -25,12 +25,15 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [historyStack, setHistoryStack] = useState<number[]>([]);
+
   const questions = form.questions || [];
   const currentQuestion: Question | undefined = questions[currentIndex];
 
   useEffect(() => {
     if (isOpen) {
       setCurrentIndex(0);
+      setHistoryStack([]);
       setAnswers({});
       setIsCompleted(false);
       setErrorMsg(null);
@@ -49,10 +52,10 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleNext = () => {
+  const handleNext = (explicitVal?: any) => {
     setErrorMsg(null);
     if (currentQuestion) {
-      const val = answers[currentQuestion.id];
+      const val = explicitVal !== undefined ? explicitVal : answers[currentQuestion.id];
       const isEmpty =
         val === undefined ||
         val === null ||
@@ -62,9 +65,33 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
         setErrorMsg("Please fill out this field");
         return;
       }
+
+      // Check logic rules
+      if (currentQuestion.logic_rules && currentQuestion.logic_rules.length > 0 && !isEmpty) {
+        const valStr = typeof val === "boolean" ? (val ? "yes" : "no") : String(val).trim().toLowerCase();
+        const rule = currentQuestion.logic_rules.find(
+          (r) => r.condition_value.trim().toLowerCase() === valStr
+        );
+
+        if (rule) {
+          if (rule.action === "end") {
+            setIsCompleted(true);
+            return;
+          }
+          if (rule.action === "jump" && rule.destination_question_id) {
+            const destIdx = questions.findIndex((q) => q.id === rule.destination_question_id);
+            if (destIdx !== -1 && destIdx !== currentIndex) {
+              setHistoryStack((prev) => [...prev, currentIndex]);
+              setCurrentIndex(destIdx);
+              return;
+            }
+          }
+        }
+      }
     }
 
     if (currentIndex < questions.length - 1) {
+      setHistoryStack((prev) => [...prev, currentIndex]);
       setCurrentIndex((prev) => prev + 1);
     } else {
       setIsCompleted(true);
@@ -77,13 +104,18 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
       setIsCompleted(false);
       return;
     }
-    if (currentIndex > 0) {
+    if (historyStack.length > 0) {
+      const prev = historyStack[historyStack.length - 1];
+      setHistoryStack((s) => s.slice(0, -1));
+      setCurrentIndex(prev);
+    } else if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
     }
   };
 
   const handleRestart = () => {
     setCurrentIndex(0);
+    setHistoryStack([]);
     setAnswers({});
     setIsCompleted(false);
     setErrorMsg(null);
@@ -276,6 +308,7 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
                                 ...answers,
                                 [currentQuestion.id]: opt.value,
                               });
+                              setTimeout(() => handleNext(opt.value), 120);
                             }}
                           >
                             <span className={styles.choiceKeyBadge}>
@@ -292,9 +325,10 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
                     <select
                       className={styles.selectInput}
                       value={answers[currentQuestion.id] || ""}
-                      onChange={(e) =>
-                        setAnswers({ ...answers, [currentQuestion.id]: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setAnswers({ ...answers, [currentQuestion.id]: val });
+                      }}
                     >
                       <option value="">Select an option...</option>
                       {currentQuestion.options?.map((opt, idx) => (
@@ -321,6 +355,7 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
                                 ...answers,
                                 [currentQuestion.id]: choice,
                               });
+                              setTimeout(() => handleNext(choice), 120);
                             }}
                           >
                             <span className={styles.choiceKeyBadge}>
@@ -349,6 +384,7 @@ export const BuilderPreviewModal: React.FC<BuilderPreviewModalProps> = ({
                                 ...answers,
                                 [currentQuestion.id]: num,
                               });
+                              setTimeout(() => handleNext(num), 120);
                             }}
                           >
                             {num}
