@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
@@ -8,11 +9,28 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Typeform Clone API")
 
-# Add CORS middleware
+# ---------------------------------------------------------------------------
+# CORS Configuration
+# ---------------------------------------------------------------------------
+# In production, set the CORS_ORIGINS environment variable to the exact
+# frontend URL (e.g. "https://your-app.vercel.app").
+# Multiple origins can be comma-separated.
+# Browsers reject allow_credentials=True with a wildcard origin, so we use
+# the explicit origin list in production.
+# ---------------------------------------------------------------------------
+_raw_origins = os.getenv("CORS_ORIGINS", "*")
+if _raw_origins.strip() == "*":
+    # Dev / unset: allow all (credentials will be limited by browser anyway)
+    allow_origins = ["*"]
+    allow_credentials = False  # Cannot use credentials=True with wildcard
+else:
+    allow_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+    allow_credentials = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify the exact origins
-    allow_credentials=True,
+    allow_origins=allow_origins,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
