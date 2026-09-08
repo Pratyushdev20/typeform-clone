@@ -40,16 +40,9 @@ def read_forms(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Auto-claim legacy unowned forms if user has none
+    # Ensure minimum 2 starter forms are available for the user (idempotent)
+    crud.ensure_user_starter_forms(db, current_user.id)
     user_forms = crud.get_forms(db, user_id=current_user.id, skip=skip, limit=limit)
-    if not user_forms:
-        unowned = db.query(models.Form).filter(models.Form.user_id == None).all()
-        for f in unowned:
-            f.user_id = current_user.id
-        if unowned:
-            db.commit()
-        user_forms = crud.get_forms(db, user_id=current_user.id, skip=skip, limit=limit)
-        
     for form in user_forms:
         form.response_count = len(form.responses)
     return user_forms

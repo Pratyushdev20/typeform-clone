@@ -155,8 +155,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         <button
           className={styles.iconOnlyBtn}
-          onClick={onOpenHelp}
-          title="Help & resources"
+          onClick={onOpenHelp || (() => router.push("/help"))}
+          title="Help center & resources"
         >
           <svg
             width="18"
@@ -191,13 +191,37 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               <div className={styles.dropdownDivider} />
               <button
                 className={styles.dropdownItemSimple}
-                onClick={() => setIsUserMenuOpen(false)}
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  router.push("/account");
+                }}
               >
                 Account settings
               </button>
               <button
                 className={styles.dropdownItemSimple}
-                onClick={() => setIsUserMenuOpen(false)}
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  router.push("/help");
+                }}
+              >
+                Help center
+              </button>
+              <button
+                className={styles.dropdownItemSimple}
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  router.push("/help");
+                }}
+              >
+                Community & workshops
+              </button>
+              <button
+                className={styles.dropdownItemSimple}
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  router.push("/account");
+                }}
               >
                 Billing & plans
               </button>

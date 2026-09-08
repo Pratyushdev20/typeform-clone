@@ -1,16 +1,22 @@
 import json
-import urllib.request
+from fastapi.testclient import TestClient
+from main import app
 from seed import seed_data
 
-API_BASE = "http://127.0.0.1:8000/api"
+client = TestClient(app)
 
 def make_req(endpoint, method="GET", data=None):
-    url = f"{API_BASE}{endpoint}"
-    req = urllib.request.Request(url, method=method)
-    req.add_header("Content-Type", "application/json")
-    body = json.dumps(data).encode("utf-8") if data else None
-    with urllib.request.urlopen(req, data=body) as response:
-        return response.getcode(), json.loads(response.read().decode("utf-8"))
+    if method == "GET":
+        res = client.get(f"/api{endpoint}")
+    elif method == "POST":
+        res = client.post(f"/api{endpoint}", json=data)
+    elif method == "PUT":
+        res = client.put(f"/api{endpoint}", json=data)
+    elif method == "DELETE":
+        res = client.delete(f"/api{endpoint}")
+    else:
+        raise ValueError(f"Unsupported method: {method}")
+    return res.status_code, res.json()
 
 def test_form_builder_flow():
     print("=== Step 0: Reset Database ===")

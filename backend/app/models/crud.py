@@ -29,6 +29,163 @@ def get_forms(db: Session, user_id: Optional[int] = None, skip: int = 0, limit: 
         query = query.filter(models.Form.is_published == True)
     return query.offset(skip).limit(limit).all()
 
+def ensure_user_starter_forms(db: Session, user_id: int) -> List[models.Form]:
+    existing_forms = db.query(models.Form).filter(models.Form.user_id == user_id).all()
+    if len(existing_forms) >= 2:
+        return existing_forms
+
+    # Check for unowned legacy forms and assign if available
+    unowned = db.query(models.Form).filter(models.Form.user_id == None).all()
+    for f in unowned:
+        if len(existing_forms) < 2:
+            f.user_id = user_id
+            existing_forms.append(f)
+    if unowned:
+        db.commit()
+
+    if len(existing_forms) >= 2:
+        return existing_forms
+
+    starter_templates = [
+        {
+            "title": "Product Feedback Survey",
+            "description": "Help us improve by sharing your thoughts and experience.",
+            "thank_you_title": "Thank you for your feedback!",
+            "thank_you_message": "Your input is invaluable in shaping our future updates.",
+            "is_published": True,
+            "questions": [
+                {
+                    "title": "How did you first discover our product?",
+                    "description": "Select the option that best describes how you found us.",
+                    "question_type": models.QuestionType.multiple_choice,
+                    "is_required": True,
+                    "order_index": 0,
+                    "options": ["Social Media", "Search Engine (Google/Bing)", "Friend or Colleague", "Online Community / Forum"]
+                },
+                {
+                    "title": "How would you rate your overall satisfaction?",
+                    "description": "1 is lowest, 5 is highest rating.",
+                    "question_type": models.QuestionType.rating,
+                    "is_required": True,
+                    "order_index": 1,
+                    "options": []
+                },
+                {
+                    "title": "Would you recommend our product to a colleague?",
+                    "description": "Your recommendation helps us grow our community.",
+                    "question_type": models.QuestionType.yes_no,
+                    "is_required": False,
+                    "order_index": 2,
+                    "options": []
+                },
+                {
+                    "title": "What is the single most important feature we could add?",
+                    "description": "Please provide any ideas or pain points you've encountered.",
+                    "question_type": models.QuestionType.long_text,
+                    "is_required": False,
+                    "order_index": 3,
+                    "options": []
+                }
+            ]
+        },
+        {
+            "title": "Event Registration & RSVP",
+            "description": "Sign up for our upcoming interactive workshop and product showcase.",
+            "thank_you_title": "You're all registered!",
+            "thank_you_message": "We've sent a calendar invite and access link to your email address.",
+            "is_published": True,
+            "questions": [
+                {
+                    "title": "What is your full name?",
+                    "description": "Enter your first and last name.",
+                    "question_type": models.QuestionType.short_text,
+                    "is_required": True,
+                    "order_index": 0,
+                    "options": []
+                },
+                {
+                    "title": "What is your primary email address?",
+                    "description": "We will send your event confirmation ticket here.",
+                    "question_type": models.QuestionType.email,
+                    "is_required": True,
+                    "order_index": 1,
+                    "options": []
+                },
+                {
+                    "title": "Will you be attending in person or virtually?",
+                    "description": "Choose your preferred attendance format.",
+                    "question_type": models.QuestionType.yes_no,
+                    "is_required": True,
+                    "order_index": 2,
+                    "options": []
+                },
+                {
+                    "title": "Which workshop track are you most interested in?",
+                    "description": "Select the track you plan to join.",
+                    "question_type": models.QuestionType.dropdown,
+                    "is_required": False,
+                    "order_index": 3,
+                    "options": ["Track 1: Building High-Converting Conversational Forms", "Track 2: Advanced Conditional Logic & Workflow Automation", "Track 3: CSV Data Import & Real-Time Analytics"]
+                }
+            ]
+        }
+    ]
+
+    existing_titles = {f.title for f in existing_forms}
+    for template in starter_templates:
+        if len(existing_forms) >= 2:
+            break
+
+        slug = str(uuid.uuid4())[:8]
+        while db.query(models.Form).filter(models.Form.slug == slug).first():
+            slug = str(uuid.uuid4())[:8]
+
+        title = template["title"]
+        if title in existing_titles:
+            title = f"{title} (Starter)"
+
+        new_form = models.Form(
+            title=title,
+            description=template["description"],
+            thank_you_title=template["thank_you_title"],
+            thank_you_message=template["thank_you_message"],
+            slug=slug,
+            is_published=template["is_published"],
+            user_id=user_id
+        )
+        db.add(new_form)
+        db.commit()
+        db.refresh(new_form)
+
+        for q_data in template["questions"]:
+            new_q = models.Question(
+                form_id=new_form.id,
+                title=q_data["title"],
+                description=q_data["description"],
+                question_type=q_data["question_type"],
+                is_required=q_data["is_required"],
+                order_index=q_data["order_index"]
+            )
+            db.add(new_q)
+            db.commit()
+            db.refresh(new_q)
+
+            for opt_idx, opt_text in enumerate(q_data["options"]):
+                new_opt = models.QuestionOption(
+                    question_id=new_q.id,
+                    value=opt_text,
+                    order_index=opt_idx
+                )
+                db.add(new_opt)
+            if q_data["options"]:
+                db.commit()
+
+        db.refresh(new_form)
+        existing_forms.append(new_form)
+        existing_titles.add(new_form.title)
+
+    return existing_forms
+
 def get_form_by_id(db: Session, form_id: int, user_id: Optional[int] = None):
     query = db.query(models.Form).filter(models.Form.id == form_id)
     if user_id is not None:
