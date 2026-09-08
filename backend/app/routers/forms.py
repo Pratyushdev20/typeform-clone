@@ -34,11 +34,11 @@ def verify_form_ownership(form_id: int, current_user: models.User, db: Session) 
     return db_form
 
 # ----------------------------------------------------
-# CSV EXPORT ENDPOINT
+# CSV EXPORT: GET /api/forms/{form_id}/export-csv
+# Returns all responses as a downloadable CSV file.
+# Skipped/branched questions produce empty cells.
 # ----------------------------------------------------
 @router.get("/{form_id}/export-csv")
-@router.get("/{form_id}/responses/export/csv")
-@router.get("/{form_id}/export/csv")
 def export_responses_csv(
     form_id: int,
     db: Session = Depends(get_db),
@@ -111,8 +111,7 @@ def read_forms(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Ensure minimum 2 starter forms are available for the user (idempotent)
-    crud.ensure_user_starter_forms(db, current_user.id)
+    # get_current_user already ensures starter forms exist for new users
     user_forms = crud.get_forms(db, user_id=current_user.id, skip=skip, limit=limit)
     for form in user_forms:
         form.response_count = len(form.responses)

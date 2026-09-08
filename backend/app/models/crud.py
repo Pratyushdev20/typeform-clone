@@ -246,6 +246,8 @@ def duplicate_form(db: Session, form_id: int, user_id: Optional[int] = None):
     db.refresh(new_form)
     
     sorted_questions = sorted(original_form.questions, key=lambda q: q.order_index)
+    # Maps old question IDs to new cloned IDs so that conditional logic rules
+    # (which reference destination_question_id) can be correctly remapped.
     old_to_new_qid = {}
     for q in sorted_questions:
         new_question = models.Question(

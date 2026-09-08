@@ -130,7 +130,11 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
     return true;
   };
 
-  // Helper to find matching logic rule based on respondent answer
+  /**
+   * Finds the first logic rule whose condition_value matches the respondent's answer.
+   * Normalises answer values to a lowercase string for case-insensitive comparison.
+   * Returns undefined if no rule matches (fall through to default progression).
+   */
   const findMatchingRule = (question: Question, ans: AnswerState) => {
     if (!question.logic_rules || question.logic_rules.length === 0) return undefined;
 
@@ -152,7 +156,14 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
     );
   };
 
-  // Move to Next Question or Submit
+  /**
+   * Advances the form flow:
+   * 1. Validate the current question.
+   * 2. Check for a matching conditional logic rule (jump/end/next).
+   * 3. If rule.action=="jump", push current index to historyStack and jump to destination.
+   * 4. If rule.action=="end" or last question, submit all collected answers.
+   * 5. Default: push current index to historyStack and advance to next sequential question.
+   */
   const handleNext = async (explicit?: { questionId: number; answer: AnswerState }) => {
     if (!form || !form.questions) return;
 
@@ -198,7 +209,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
         }
       }
 
-      // Default progression
+      // Default: advance sequentially, or submit on last question
       if (currentStep < form.questions.length - 1) {
         setHistoryStack((prev) => [...prev, currentStep]);
         setCurrentStep(currentStep + 1);
@@ -208,7 +219,11 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
     }
   };
 
-  // Move to Previous Question (following the history stack)
+  /**
+   * Navigates backward by popping from historyStack.
+   * historyStack records the exact sequence of visited question indices,
+   * so Back always returns to the previously-seen question (respecting jumps).
+   */
   const handlePrev = () => {
     if (!form || !form.questions) return;
     if (typeof currentStep === "number") {
@@ -222,7 +237,12 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
     }
   };
 
-  // Submit responses to backend (submitting only answered questions)
+  /**
+   * Submits only the questions the respondent actually answered.
+   * Questions skipped due to conditional branching are never in the answers map,
+   * so they are naturally excluded. The backend will record empty cells for them
+   * in the CSV export via ans_map.get(q.id, "").
+   */
   const handleSubmit = async (lastQId?: number, lastAns?: AnswerState) => {
     if (!form || !form.questions) return;
 
@@ -235,6 +255,7 @@ export const PublicFormRunner: React.FC<PublicFormRunnerProps> = ({ slug }) => {
         ...(lastQId && lastAns ? { [lastQId]: lastAns } : {}),
       };
 
+      // Filter: only include questions that actually have a value
       const payloadAnswers = form.questions
         .filter((q) => {
           const ans = mergedAnswers[q.id];

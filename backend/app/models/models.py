@@ -4,6 +4,16 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, E
 from sqlalchemy.orm import relationship
 from ..core.database import Base
 
+# ---------------------------------------------------------------------------
+# Database Schema Overview
+# ---------------------------------------------------------------------------
+# User  1 ---< Form  1 ---< Question  1 ---< QuestionOption
+#                              |                 |
+#                              +------< LogicRule (condition_value → jump/end/next)
+#                              +------< Answer (FK Response + FK Question)
+#        Form 1 ---< Response 1 ---< Answer
+# ---------------------------------------------------------------------------
+
 class QuestionType(str, enum.Enum):
     short_text = "short_text"
     long_text = "long_text"

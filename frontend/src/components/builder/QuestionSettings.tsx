@@ -75,7 +75,8 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
       ];
     }
     if (activeQuestion.question_type === QuestionType.rating) {
-      return [1, 2, 3, 4, 5].map((num) => ({
+      // Rating supports 1-10; show all valid values for conditional logic
+      return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => ({
         label: `${num} ★`,
         value: num.toString(),
       }));

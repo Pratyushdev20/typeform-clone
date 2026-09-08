@@ -47,6 +47,15 @@ def get_current_user(
     auth: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db),
 ) -> models.User:
+    """
+    Three-tier authentication strategy:
+    1. Local JWT   — created on email/password login via /api/auth/login or /api/auth/signup.
+    2. Firebase ID token — issued by Firebase for Google / Microsoft OAuth sign-in;
+       decoded without signature verification (trust via Firebase SDK on client-side).
+       The user's Firebase email is used to look up or auto-create a local DB record.
+    3. Fallback    — if no valid token, fall back to the first user in the DB (dev/demo mode).
+    After resolving the user, ensures they have at least 2 starter forms (idempotent).
+    """
     from ..models.crud import ensure_user_starter_forms
 
     user: Optional[models.User] = None
