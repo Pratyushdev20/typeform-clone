@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 import styles from "./TopHeader.module.css";
 
 interface TopHeaderProps {
@@ -15,21 +17,45 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   onOpenBrandKit,
   onOpenHelp,
 }) => {
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  const userName = user?.name || "My Workspace";
+  const userEmail = user?.email || "user@example.com";
+
+  const getInitials = (name: string, email: string) => {
+    if (name && name.trim()) {
+      const parts = name.trim().split(" ");
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return name.slice(0, 2).toUpperCase();
+    }
+    return email.slice(0, 2).toUpperCase();
+  };
+
+  const initials = getInitials(userName, userEmail);
+
+  const handleLogout = () => {
+    setIsUserMenuOpen(false);
+    logout();
+    router.push("/login");
+  };
 
   return (
     <header className={styles.topHeader}>
       <div className={styles.leftSection}>
         <div className={styles.logoGroup}>
           <div className={styles.typeformLogoPill} title="Workspace Icon" />
-          <div className={styles.workspaceAvatar}>D</div>
+          <div className={styles.workspaceAvatar}>{initials[0] || "W"}</div>
           <button
             className={styles.workspaceSelectorBtn}
             onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
             aria-expanded={isWorkspaceMenuOpen}
           >
-            <span className={styles.workspaceName}>devprat970</span>
+            <span className={styles.workspaceName}>{userName}&apos;s workspace</span>
             <svg
               className={`${styles.chevron} ${isWorkspaceMenuOpen ? styles.chevronOpen : ""}`}
               width="12"
@@ -49,9 +75,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             <div className={styles.dropdownMenu}>
               <div className={styles.dropdownHeader}>Switch Workspace</div>
               <div className={`${styles.dropdownItem} ${styles.dropdownItemActive}`}>
-                <div className={styles.smallAvatar}>D</div>
+                <div className={styles.smallAvatar}>{initials[0] || "W"}</div>
                 <div>
-                  <div className={styles.itemTitle}>devprat970</div>
+                  <div className={styles.itemTitle}>{userName}&apos;s workspace</div>
                   <div className={styles.itemSubtitle}>Personal (Owner)</div>
                 </div>
                 <span className={styles.checkIcon}>✓</span>
@@ -147,13 +173,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             title="User Profile"
           >
-            PD
+            {initials}
           </button>
           {isUserMenuOpen && (
             <div className={styles.userDropdown}>
               <div className={styles.userDropdownInfo}>
-                <div className={styles.userDropdownName}>Pratyush Dev</div>
-                <div className={styles.userDropdownEmail}>devprat970@example.com</div>
+                <div className={styles.userDropdownName}>{userName}</div>
+                <div className={styles.userDropdownEmail}>{userEmail}</div>
               </div>
               <div className={styles.dropdownDivider} />
               <button
@@ -171,7 +197,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               <div className={styles.dropdownDivider} />
               <button
                 className={`${styles.dropdownItemSimple} ${styles.dropdownItemDanger}`}
-                onClick={() => setIsUserMenuOpen(false)}
+                onClick={handleLogout}
               >
                 Log out
               </button>

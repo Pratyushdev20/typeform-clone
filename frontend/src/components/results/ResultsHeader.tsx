@@ -1,25 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Edit3, Share2, Check } from "lucide-react";
-import { Form } from "../../types";
+import { ArrowLeft, Edit3, Share2, Check, Upload, Loader2 } from "lucide-react";
+import { Form, CSVImportResponse } from "../../types";
 import { useToast } from "../../context/ToastContext";
+import { fetcher } from "../../lib/api";
 import styles from "./results.module.css";
 
 interface ResultsHeaderProps {
   form: Form;
   totalResponses: number;
+  onImportSuccess?: () => void;
 }
 
 export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   form,
   totalResponses,
+  onImportSuccess,
 }) => {
   const router = useRouter();
   const { showToast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [copied, setCopied] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/to/${form.slug || form.id}`;
@@ -30,6 +36,53 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
       setTimeout(() => setCopied(false), 2000);
     } else {
       showToast(`Link: ${url}`, "info");
+    }
+  };
+
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      showToast("Please upload a valid .csv file.", "error");
+      return;
+    }
+
+    try {
+      setIsImporting(true);
+      const csvText = await file.text();
+
+      if (!csvText.trim()) {
+        showToast("No responses found in this CSV file.", "error");
+        setIsImporting(false);
+        return;
+      }
+
+      const res: CSVImportResponse = await fetcher(`/forms/${form.id}/import-csv`, {
+        method: "POST",
+        body: JSON.stringify({ csv_content: csvText }),
+      });
+
+      showToast(
+        res.message || `Successfully imported ${res.imported_count} response(s)!`,
+        "success"
+      );
+
+      if (onImportSuccess) {
+        onImportSuccess();
+      }
+    } catch (err: any) {
+      console.error("CSV import error:", err);
+      showToast(err.message || "Failed to import CSV responses.", "error");
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -60,6 +113,36 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
 
         {/* Right: Actions */}
         <div className={styles.headerActions}>
+          {/* Hidden File Input for CSV Import */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+
+          {/* Import CSV Button */}
+          <button
+            type="button"
+            className={styles.secondaryActionBtn}
+            onClick={handleImportClick}
+            disabled={isImporting}
+            title="Import form responses from CSV file"
+          >
+            {isImporting ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                <span>Importing...</span>
+              </>
+            ) : (
+              <>
+                <Upload size={14} />
+                <span>Import CSV</span>
+              </>
+            )}
+          </button>
+
           {form.is_published && (
             <button
               type="button"

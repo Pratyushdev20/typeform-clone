@@ -154,7 +154,11 @@ function FormResultsContent() {
   return (
     <div className={styles.resultsPage}>
       {/* 1. Header */}
-      <ResultsHeader form={form} totalResponses={responses.length} />
+      <ResultsHeader
+        form={form}
+        totalResponses={responses.length}
+        onImportSuccess={loadData}
+      />
 
       {/* 2. Main Content */}
       <main className={styles.mainResultsContent}>
@@ -219,10 +223,14 @@ function FormResultsContent() {
   );
 }
 
+import { ProtectedRoute } from "../../../../components/auth/ProtectedRoute";
+
 export default function FormResultsPage() {
   return (
-    <ToastProvider>
-      <FormResultsContent />
-    </ToastProvider>
+    <ProtectedRoute>
+      <ToastProvider>
+        <FormResultsContent />
+      </ToastProvider>
+    </ProtectedRoute>
   );
 }

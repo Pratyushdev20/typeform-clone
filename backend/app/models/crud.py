@@ -4,14 +4,36 @@ from sqlalchemy.orm import Session
 from . import models
 from ..schemas import schemas
 
-def get_forms(db: Session, skip: int = 0, limit: int = 100, published_only: bool = False):
+def get_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email == email.lower().strip()).first()
+
+def get_user_by_id(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.id == user_id).first()
+
+def create_user(db: Session, name: str, email: str, password_hash: str):
+    db_user = models.User(
+        name=name.strip(),
+        email=email.lower().strip(),
+        password_hash=password_hash
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def get_forms(db: Session, user_id: Optional[int] = None, skip: int = 0, limit: int = 100, published_only: bool = False):
     query = db.query(models.Form)
+    if user_id is not None:
+        query = query.filter(models.Form.user_id == user_id)
     if published_only:
         query = query.filter(models.Form.is_published == True)
     return query.offset(skip).limit(limit).all()
 
-def get_form_by_id(db: Session, form_id: int):
-    return db.query(models.Form).filter(models.Form.id == form_id).first()
+def get_form_by_id(db: Session, form_id: int, user_id: Optional[int] = None):
+    query = db.query(models.Form).filter(models.Form.id == form_id)
+    if user_id is not None:
+        query = query.filter(models.Form.user_id == user_id)
+    return query.first()
 
 def get_form_by_slug(db: Session, slug: str):
     form = db.query(models.Form).filter(models.Form.slug == slug).first()
@@ -19,15 +41,15 @@ def get_form_by_slug(db: Session, slug: str):
         form = db.query(models.Form).filter(models.Form.id == int(slug)).first()
     return form
 
-def create_form(db: Session, form: schemas.FormCreate, slug: str):
-    db_form = models.Form(**form.model_dump(), slug=slug)
+def create_form(db: Session, form: schemas.FormCreate, slug: str, user_id: Optional[int] = None):
+    db_form = models.Form(**form.model_dump(), slug=slug, user_id=user_id)
     db.add(db_form)
     db.commit()
     db.refresh(db_form)
     return db_form
 
-def update_form(db: Session, form_id: int, form_update: schemas.FormUpdate):
-    db_form = get_form_by_id(db, form_id)
+def update_form(db: Session, form_id: int, form_update: schemas.FormUpdate, user_id: Optional[int] = None):
+    db_form = get_form_by_id(db, form_id, user_id=user_id)
     if db_form:
         update_data = form_update.model_dump(exclude_unset=True)
         for key, value in update_data.items():
@@ -36,16 +58,16 @@ def update_form(db: Session, form_id: int, form_update: schemas.FormUpdate):
         db.refresh(db_form)
     return db_form
 
-def delete_form(db: Session, form_id: int):
-    db_form = get_form_by_id(db, form_id)
+def delete_form(db: Session, form_id: int, user_id: Optional[int] = None):
+    db_form = get_form_by_id(db, form_id, user_id=user_id)
     if db_form:
         db.delete(db_form)
         db.commit()
         return True
     return False
 
-def duplicate_form(db: Session, form_id: int):
-    original_form = get_form_by_id(db, form_id)
+def duplicate_form(db: Session, form_id: int, user_id: Optional[int] = None):
+    original_form = get_form_by_id(db, form_id, user_id=user_id)
     if not original_form:
         return None
         
@@ -59,7 +81,8 @@ def duplicate_form(db: Session, form_id: int):
         thank_you_title=original_form.thank_you_title,
         thank_you_message=original_form.thank_you_message,
         slug=new_slug,
-        is_published=False
+        is_published=False,
+        user_id=user_id or original_form.user_id
     )
     db.add(new_form)
     db.commit()
@@ -181,7 +204,10 @@ def get_responses_for_form(db: Session, form_id: int):
     return db.query(models.Response).filter(models.Response.form_id == form_id).all()
 
 def create_response(db: Session, form_id: int, response: schemas.ResponseCreate):
-    db_response = models.Response(form_id=form_id)
+    kwargs = {"form_id": form_id}
+    if response.submitted_at is not None:
+        kwargs["submitted_at"] = response.submitted_at
+    db_response = models.Response(**kwargs)
     db.add(db_response)
     db.commit()
     db.refresh(db_response)
@@ -199,6 +225,30 @@ def create_response(db: Session, form_id: int, response: schemas.ResponseCreate)
     db.commit()
     db.refresh(db_response)
     return db_response
+
+def bulk_create_responses(db: Session, form_id: int, responses: List[schemas.ResponseCreate]) -> int:
+    created_count = 0
+    for resp in responses:
+        kwargs = {"form_id": form_id}
+        if resp.submitted_at is not None:
+            kwargs["submitted_at"] = resp.submitted_at
+        db_response = models.Response(**kwargs)
+        db.add(db_response)
+        db.flush()  # gets db_response.id without committing
+        
+        for ans in resp.answers:
+            db_answer = models.Answer(
+                response_id=db_response.id,
+                question_id=ans.question_id,
+                text_value=ans.text_value,
+                number_value=ans.number_value,
+                boolean_value=ans.boolean_value
+            )
+            db.add(db_answer)
+        created_count += 1
+        
+    db.commit()
+    return created_count
 
 def get_form_stats(db: Session, form_id: int):
     form = get_form_by_id(db, form_id)

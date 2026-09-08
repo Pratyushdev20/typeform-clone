@@ -16,6 +16,7 @@ def seed_data():
     db.query(models.QuestionOption).delete()
     db.query(models.Question).delete()
     db.query(models.Form).delete()
+    db.query(models.User).delete()
     db.commit()
 
     # Create Form 1

@@ -9,6 +9,19 @@ export enum QuestionType {
   rating = "rating",
 }
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
 export interface QuestionOption {
   id: number;
   question_id: number;
@@ -29,6 +42,7 @@ export interface Question {
 
 export interface Form {
   id: number;
+  user_id?: number;
   slug: string;
   title: string;
   description?: string;
@@ -86,3 +100,8 @@ export interface FormStats {
   questions: QuestionStats[];
 }
 
+export interface CSVImportResponse {
+  imported_count: number;
+  total_responses: number;
+  message: string;
+}

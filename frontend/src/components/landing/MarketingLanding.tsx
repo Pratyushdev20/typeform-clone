@@ -14,9 +14,15 @@ import styles from "./MarketingLanding.module.css";
 
 interface MarketingLandingProps {
   onStart: () => void;
+  onLogin?: () => void;
+  onSignup?: () => void;
 }
 
-export const MarketingLanding: React.FC<MarketingLandingProps> = ({ onStart }) => {
+export const MarketingLanding: React.FC<MarketingLandingProps> = ({
+  onStart,
+  onLogin,
+  onSignup,
+}) => {
   const navItems = ["Products", "Solutions", "Resources", "Pricing"];
   const capabilities = [
     [
@@ -32,6 +38,9 @@ export const MarketingLanding: React.FC<MarketingLandingProps> = ({ onStart }) =
       "Make confident decisions faster with AI-moderated studies and deeper answers.",
     ],
   ];
+
+  const handleLoginClick = onLogin || onStart;
+  const handleSignupClick = onSignup || onStart;
 
   return (
     <main className={styles.marketingPage}>
@@ -61,16 +70,16 @@ export const MarketingLanding: React.FC<MarketingLandingProps> = ({ onStart }) =
           </nav>
 
           <div className={styles.marketingNavActions}>
-            <button type="button" onClick={onStart}>
+            <button type="button" onClick={handleLoginClick}>
               Log in
             </button>
-            <button type="button" onClick={onStart}>
+            <button type="button" onClick={handleSignupClick}>
               Contact sales
             </button>
             <button
               type="button"
               className={styles.marketingSignup}
-              onClick={onStart}
+              onClick={handleSignupClick}
             >
               Sign up
             </button>

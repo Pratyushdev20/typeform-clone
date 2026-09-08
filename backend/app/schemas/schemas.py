@@ -45,6 +45,31 @@ class Question(QuestionBase):
     options: List[QuestionOption] = []
     model_config = ConfigDict(from_attributes=True)
 
+class UserBase(BaseModel):
+    name: str
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserOut(UserBase):
+    id: int
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut
+
+class TokenData(BaseModel):
+    user_id: Optional[int] = None
+    email: Optional[str] = None
+
 class FormBase(BaseModel):
     title: str
     description: Optional[str] = None
@@ -63,6 +88,7 @@ class FormUpdate(BaseModel):
 
 class Form(FormBase):
     id: int
+    user_id: Optional[int] = None
     slug: str
     is_published: bool
     created_at: datetime
@@ -90,6 +116,7 @@ class ResponseBase(BaseModel):
 
 class ResponseCreate(ResponseBase):
     answers: List[AnswerCreate]
+    submitted_at: Optional[datetime] = None
 
 class Response(ResponseBase):
     id: int
@@ -117,4 +144,17 @@ class FormStats(BaseModel):
     title: str
     total_responses: int
     questions: List[QuestionStats]
+
+class CSVImportRow(BaseModel):
+    submitted_at: Optional[str] = None
+    answers: Dict[str, Any]  # question title or ID -> value
+
+class CSVImportRequest(BaseModel):
+    csv_content: Optional[str] = None
+    rows: Optional[List[CSVImportRow]] = None
+
+class CSVImportResponse(BaseModel):
+    imported_count: int
+    total_responses: int
+    message: str
 

@@ -9,8 +9,18 @@ def run_tests():
     print("=== Step 0: Seeding fresh data ===")
     seed_data()
 
+    # Signup test user for protected management endpoints
+    auth_res = client.post("/api/auth/signup", json={
+        "name": "Test User",
+        "email": "testuser@example.com",
+        "password": "testpassword123"
+    })
+    assert auth_res.status_code == 200, f"Auth signup failed: {auth_res.text}"
+    token = auth_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
     print("\n=== Test 1: Fetch initial forms ===")
-    res = client.get("/api/forms/")
+    res = client.get("/api/forms/", headers=headers)
     assert res.status_code == 200, f"Expected 200, got {res.status_code}"
     forms = res.json()
     assert len(forms) >= 2, f"Expected at least 2 forms, got {len(forms)}"
@@ -28,7 +38,7 @@ def run_tests():
         "is_required": True,
         "options": [{"value": "Updated Opt 1"}, {"value": "Updated Opt 2"}]
     }
-    res = client.put(f"/api/questions/{q1_id}", json=update_payload)
+    res = client.put(f"/api/questions/{q1_id}", json=update_payload, headers=headers)
     assert res.status_code == 200, f"Expected 200, got {res.status_code}: {res.text}"
     updated_q = res.json()
     assert updated_q["title"] == "Updated Question 1 Title"
@@ -43,35 +53,35 @@ def run_tests():
         "question_type": "short_text",
         "is_required": False
     }
-    res = client.post(f"/api/forms/{form_id}/questions", json=new_q_payload)
+    res = client.post(f"/api/forms/{form_id}/questions", json=new_q_payload, headers=headers)
     assert res.status_code == 200
     temp_q_id = res.json()["id"]
     
-    res = client.delete(f"/api/questions/{temp_q_id}")
+    res = client.delete(f"/api/questions/{temp_q_id}", headers=headers)
     assert res.status_code == 200, f"Expected 200, got {res.status_code}: {res.text}"
     
     # Confirm it's gone
-    res = client.get(f"/api/forms/{form_id}")
+    res = client.get(f"/api/forms/{form_id}", headers=headers)
     q_ids = [q["id"] for q in res.json()["questions"]]
     assert temp_q_id not in q_ids
     print("Question delete PASSED!")
 
     print("\n=== Test 4: Question Reorder (PUT /api/forms/{form_id}/questions/reorder) ===")
-    res = client.get(f"/api/forms/{form_id}")
+    res = client.get(f"/api/forms/{form_id}", headers=headers)
     current_questions = res.json()["questions"]
     orig_q_ids = [q["id"] for q in current_questions]
     reversed_ids = list(reversed(orig_q_ids))
     
-    res = client.put(f"/api/forms/{form_id}/questions/reorder", json={"question_ids": reversed_ids})
+    res = client.put(f"/api/forms/{form_id}/questions/reorder", json={"question_ids": reversed_ids}, headers=headers)
     assert res.status_code == 200, f"Expected 200, got {res.status_code}: {res.text}"
     
-    res = client.get(f"/api/forms/{form_id}")
+    res = client.get(f"/api/forms/{form_id}", headers=headers)
     reordered_q_ids = [q["id"] for q in res.json()["questions"]]
     assert reordered_q_ids == reversed_ids, f"Expected {reversed_ids}, got {reordered_q_ids}"
     print(f"Question reorder PASSED! (New order: {reordered_q_ids})")
 
     print("\n=== Test 5: Deep Form Duplication (POST /api/forms/{form_id}/duplicate) ===")
-    res = client.post(f"/api/forms/{form_id}/duplicate")
+    res = client.post(f"/api/forms/{form_id}/duplicate", headers=headers)
     assert res.status_code == 200, f"Expected 200, got {res.status_code}: {res.text}"
     dup_form = res.json()
     assert dup_form["id"] != form_id
@@ -85,6 +95,15 @@ def run_tests():
 
     print("\n=== Test 6: Submission Validation (POST /api/public/forms/{slug}/responses) ===")
     seed_data()
+    
+    # Re-signup after seed for stats test
+    auth_res = client.post("/api/auth/signup", json={
+        "name": "Test User",
+        "email": "testuser@example.com",
+        "password": "testpassword123"
+    })
+    token = auth_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
     
     # Form 1: short_text, rating, long_text, yes_no
     res1 = client.get("/api/public/forms/cust-sat-123")
@@ -206,7 +225,7 @@ def run_tests():
     print("Validation 6i (Valid Form 2 submission accepted) PASSED!")
 
     print("\n=== Test 7: Statistics Endpoint (GET /api/forms/{form_id}/stats) ===")
-    res = client.get("/api/forms/1/stats")
+    res = client.get("/api/forms/1/stats", headers=headers)
     assert res.status_code == 200, f"Expected 200, got {res.status_code}: {res.text}"
     stats1 = res.json()
     assert stats1["form_id"] == 1
@@ -222,7 +241,7 @@ def run_tests():
         if q_stat["text_answers"]:
             print(f"  Text answers: {q_stat['text_answers']}")
 
-    res = client.get("/api/forms/2/stats")
+    res = client.get("/api/forms/2/stats", headers=headers)
     assert res.status_code == 200, f"Expected 200, got {res.status_code}: {res.text}"
     stats2 = res.json()
     assert stats2["form_id"] == 2
