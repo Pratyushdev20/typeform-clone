@@ -3,10 +3,10 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Edit3, Share2, Check, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit3, Share2, Check, Upload, Download, Loader2 } from "lucide-react";
 import { Form, CSVImportResponse } from "../../types";
 import { useToast } from "../../context/ToastContext";
-import { fetcher } from "../../lib/api";
+import { fetcher, getStoredToken } from "../../lib/api";
 import styles from "./results.module.css";
 
 interface ResultsHeaderProps {
@@ -26,6 +26,7 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
 
   const [copied, setCopied] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/to/${form.slug || form.id}`;
@@ -43,6 +44,57 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
+    }
+  };
+
+  const handleExportCSV = async () => {
+    if (isExporting) return;
+    try {
+      setIsExporting(true);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+      const token = getStoredToken();
+      const res = await fetch(`${API_URL}/forms/${form.id}/export-csv`, {
+        method: "GET",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        let detail = "Failed to export CSV.";
+        try {
+          const err = await res.json();
+          detail = err.detail || detail;
+        } catch {}
+        throw new Error(detail);
+      }
+
+      const blob = await res.blob();
+
+      // Derive filename from Content-Disposition header if available
+      const disposition = res.headers.get("Content-Disposition") || "";
+      let filename = `${form.title.replace(/[^a-zA-Z0-9_\- ]/g, "").trim().replace(/ /g, "_").toLowerCase() || `form_${form.id}`}_responses.csv`;
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      if (match && match[1]) {
+        filename = match[1];
+      }
+
+      // Trigger browser download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      showToast("CSV exported successfully!", "success");
+    } catch (err: any) {
+      console.error("CSV export error:", err);
+      showToast(err.message || "Failed to export CSV.", "error");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -139,6 +191,32 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
               <>
                 <Upload size={14} />
                 <span>Import CSV</span>
+              </>
+            )}
+          </button>
+
+          {/* Export CSV Button */}
+          <button
+            type="button"
+            className={styles.exportCsvBtn}
+            onClick={handleExportCSV}
+            disabled={isExporting || totalResponses === 0}
+            title={
+              totalResponses === 0
+                ? "No responses to export"
+                : "Download all responses as a CSV file"
+            }
+            id="export-csv-btn"
+          >
+            {isExporting ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                <span>Exporting...</span>
+              </>
+            ) : (
+              <>
+                <Download size={14} />
+                <span>Export CSV{totalResponses === 0 ? " (No data)" : ""}</span>
               </>
             )}
           </button>

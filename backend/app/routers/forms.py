@@ -4,7 +4,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
 from ..core.database import get_db
@@ -32,6 +32,77 @@ def verify_form_ownership(form_id: int, current_user: models.User, db: Session) 
         db.refresh(db_form)
         
     return db_form
+
+# ----------------------------------------------------
+# CSV EXPORT ENDPOINT
+# ----------------------------------------------------
+@router.get("/{form_id}/export-csv")
+@router.get("/{form_id}/responses/export/csv")
+@router.get("/{form_id}/export/csv")
+def export_responses_csv(
+    form_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    db_form = verify_form_ownership(form_id, current_user, db)
+
+    # 1. Retrieve questions in explicit order
+    questions = sorted(db_form.questions, key=lambda q: q.order_index)
+
+    # 2. Retrieve responses
+    responses = crud.get_responses_for_form(db, form_id)
+
+    # 3. Construct CSV Header
+    # Response ID, Submitted At, followed by each question title
+    headers = ["Response ID", "Submitted At"] + [q.title for q in questions]
+
+    output = io.StringIO()
+    writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(headers)
+
+    # 4. Construct Rows
+    for resp in responses:
+        # Build answer map: question_id -> string value
+        ans_map = {}
+        for ans in resp.answers:
+            val_str = ""
+            if ans.text_value is not None and ans.text_value != "":
+                val_str = str(ans.text_value)
+            elif ans.number_value is not None:
+                # Format float nicely (e.g. 5 instead of 5.0 if integer)
+                if ans.number_value.is_integer():
+                    val_str = str(int(ans.number_value))
+                else:
+                    val_str = str(ans.number_value)
+            elif ans.boolean_value is not None:
+                val_str = "Yes" if ans.boolean_value else "No"
+            ans_map[ans.question_id] = val_str
+
+        submitted_str = resp.submitted_at.isoformat() if resp.submitted_at else ""
+        row = [str(resp.id), submitted_str]
+
+        # Map each question column. If question was skipped/unanswered due to branching, output empty string.
+        for q in questions:
+            row.append(ans_map.get(q.id, ""))
+
+        writer.writerow(row)
+
+    csv_data = output.getvalue()
+
+    # Sanitize title for filename
+    clean_title = re.sub(r'[^a-zA-Z0-9_\- ]+', '', db_form.title).strip().replace(' ', '_').lower()
+    if not clean_title:
+        clean_title = f"form_{db_form.id}"
+    filename = f"{clean_title}_responses.csv"
+
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
 
 @router.get("/", response_model=List[schemas.Form])
 def read_forms(
