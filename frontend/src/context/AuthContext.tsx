@@ -7,6 +7,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   updateProfile,
   updatePassword,
@@ -29,6 +31,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   loading: boolean;
   isLoading: boolean; // Alias for backward compatibility
+  redirectPending: boolean;
   signup: (name: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -58,9 +61,16 @@ export function formatFirebaseError(error: any): string {
     case "auth/invalid-credential":
       return "Incorrect email or password. Please try again.";
     case "auth/popup-closed-by-user":
-      return "Sign-in popup was closed before completing.";
+      return "Sign-in was cancelled. Please try again.";
+    case "auth/cancelled-popup-request":
+      // Happens when a second popup is opened before the first resolves — not an error
+      return "";
     case "auth/popup-blocked":
-      return "Sign-in popup was blocked by your browser. Please allow popups for this site.";
+      // Should not normally surface to the user since we auto-fall back to redirect,
+      // but keep a friendly message as a safety net.
+      return "Pop-up was blocked. Redirecting you to sign in\u2026";
+    case "auth/redirect-cancelled-by-user":
+      return "Sign-in was cancelled. Please try again.";
     case "auth/operation-not-allowed":
       return "This sign-in provider is not enabled in the Firebase Console.";
     case "auth/account-exists-with-different-credential":
@@ -82,12 +92,35 @@ export function formatFirebaseError(error: any): string {
   }
 }
 
+/** Store token + authData for a Firebase user credential result. */
+async function storeUserCredential(
+  fbUser: FirebaseUser,
+  providerId: string,
+  setUser: (u: AuthUser) => void
+) {
+  const token = await fbUser.getIdToken();
+  const authData: AuthUser = {
+    uid: fbUser.uid,
+    email: fbUser.email,
+    displayName: fbUser.displayName || fbUser.email?.split("@")[0] || "User",
+    photoURL: fbUser.photoURL,
+    providerId,
+  };
+  setUser(authData);
+  setStoredAuth(token, authData);
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // True while we're waiting for a redirect result to come back after page reload
+  const [redirectPending, setRedirectPending] = useState(false);
 
   useEffect(() => {
+    let settled = false;
+
+    // 1. Subscribe to auth state changes (handles email/password + existing sessions)
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         setFirebaseUser(fbUser);
@@ -111,7 +144,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         clearStoredAuth();
       }
-      setLoading(false);
+
+      // 2. After auth state settles, check for a pending redirect result (once only)
+      if (!settled) {
+        settled = true;
+        try {
+          const result = await getRedirectResult(auth);
+          if (result?.user) {
+            // We came back from a redirect-based OAuth flow
+            const providerId =
+              result.user.providerData?.[0]?.providerId ||
+              (result.providerId ?? "unknown");
+            await storeUserCredential(result.user, providerId, setUser);
+            setFirebaseUser(result.user);
+          }
+        } catch (e: any) {
+          // Redirect errors that are non-critical (e.g. no pending redirect)
+          if (e?.code !== "auth/no-current-user") {
+            console.warn("getRedirectResult error:", e);
+          }
+        } finally {
+          setRedirectPending(false);
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
     });
 
     return () => unsubscribe();
@@ -149,30 +207,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStoredAuth(token, authData);
   }, []);
 
+  /**
+   * Attempt popup sign-in; if the browser blocks the popup, silently fall back
+   * to redirect sign-in. The redirect flow reloads the page and the result is
+   * captured by getRedirectResult() inside the useEffect above.
+   *
+   * When signInWithRedirect is called the page will navigate away, so the
+   * returned Promise never actually resolves in this session — the caller's
+   * finally{} block will still run (loading state cleared) before the page
+   * unloads, which is the correct UX.
+   */
   const loginWithGoogle = useCallback(async () => {
-    const res = await signInWithPopup(auth, googleProvider);
-    const token = await res.user.getIdToken();
-    const authData: AuthUser = {
-      uid: res.user.uid,
-      email: res.user.email,
-      displayName: res.user.displayName || "Google User",
-      photoURL: res.user.photoURL,
-      providerId: "google.com",
-    };
-    setStoredAuth(token, authData);
+    try {
+      const res = await signInWithPopup(auth, googleProvider);
+      await storeUserCredential(res.user, "google.com", setUser);
+    } catch (err: any) {
+      if (err?.code === "auth/popup-blocked") {
+        // Popup blocked → silently redirect instead
+        setRedirectPending(true);
+        await signInWithRedirect(auth, googleProvider);
+        // After redirect the page unloads; code below never runs
+        return;
+      }
+      // auth/cancelled-popup-request is benign — ignore it silently
+      if (err?.code === "auth/cancelled-popup-request") return;
+      throw err;
+    }
   }, []);
 
   const loginWithMicrosoft = useCallback(async () => {
-    const res = await signInWithPopup(auth, microsoftProvider);
-    const token = await res.user.getIdToken();
-    const authData: AuthUser = {
-      uid: res.user.uid,
-      email: res.user.email,
-      displayName: res.user.displayName || "Microsoft User",
-      photoURL: res.user.photoURL,
-      providerId: "microsoft.com",
-    };
-    setStoredAuth(token, authData);
+    try {
+      const res = await signInWithPopup(auth, microsoftProvider);
+      await storeUserCredential(res.user, "microsoft.com", setUser);
+    } catch (err: any) {
+      if (err?.code === "auth/popup-blocked") {
+        setRedirectPending(true);
+        await signInWithRedirect(auth, microsoftProvider);
+        return;
+      }
+      if (err?.code === "auth/cancelled-popup-request") return;
+      throw err;
+    }
   }, []);
 
   const logout = useCallback(async () => {
@@ -225,6 +300,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firebaseUser,
         loading,
         isLoading: loading,
+        redirectPending,
         signup,
         login,
         loginWithGoogle,

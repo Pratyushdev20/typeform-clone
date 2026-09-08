@@ -9,7 +9,14 @@ import styles from "./auth.module.css";
 
 export const SignupForm: React.FC = () => {
   const router = useRouter();
-  const { signup, loginWithGoogle, loginWithMicrosoft } = useAuth();
+  const { signup, loginWithGoogle, loginWithMicrosoft, user, loading } = useAuth();
+
+  // If the user is already signed in (e.g. after OAuth redirect), go to dashboard
+  React.useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [loading, user, router]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -68,10 +75,12 @@ export const SignupForm: React.FC = () => {
     try {
       setIsLoggingInGoogle(true);
       await loginWithGoogle();
+      // popup success → navigate; redirect fallback → page unloads before this runs
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Google Auth error:", err);
-      setError(formatFirebaseError(err));
+      const msg = formatFirebaseError(err);
+      if (msg) setError(msg);
     } finally {
       setIsLoggingInGoogle(false);
     }
@@ -85,7 +94,8 @@ export const SignupForm: React.FC = () => {
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Microsoft Auth error:", err);
-      setError(formatFirebaseError(err));
+      const msg = formatFirebaseError(err);
+      if (msg) setError(msg);
     } finally {
       setIsLoggingInMicrosoft(false);
     }
