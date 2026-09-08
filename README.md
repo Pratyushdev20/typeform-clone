@@ -124,19 +124,28 @@ The application uses Firebase Authentication for sign-in, a FastAPI backend for 
 
 ## Screenshots
 
-> Screenshots will appear here once added to the `screenshots/` folder.
+### Landing Page
+![Landing Page](screenshots/landing-page.png)
 
-| Screen | Preview |
-|--------|---------|
-| Landing Page | *(add `screenshots/landing-page.png`)* |
-| Sign Up | *(add `screenshots/signup-page.png`)* |
-| Login | *(add `screenshots/login-page.png`)* |
-| Dashboard | *(add `screenshots/dashboard.png`)* |
-| Form Builder | *(add `screenshots/form-builder.png`)* |
-| Question Types | *(add `screenshots/question-types.png`)* |
-| Form Preview | *(add `screenshots/form-preview.png`)* |
-| Public Form | *(add `screenshots/public-form.png`)* |
-| Results & Analytics | *(add `screenshots/form-results.png`)* |
+---
+
+### Login
+![Login Page](screenshots/login-page.png)
+
+---
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+---
+
+### Form Builder
+![Form Builder](screenshots/form-builder.png)
+
+---
+
+### Public Form (Respondent View)
+![Public Form](screenshots/public-form.png)
 
 ---
 
