@@ -22,7 +22,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const userName = user?.name || "My Workspace";
+  const userName = user?.displayName || user?.email?.split("@")[0] || "My Workspace";
   const userEmail = user?.email || "user@example.com";
 
   const getInitials = (name: string, email: string) => {
@@ -33,15 +33,22 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       }
       return name.slice(0, 2).toUpperCase();
     }
-    return email.slice(0, 2).toUpperCase();
+    if (email && email.trim()) {
+      return email.slice(0, 2).toUpperCase();
+    }
+    return "TF";
   };
 
   const initials = getInitials(userName, userEmail);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsUserMenuOpen(false);
-    logout();
-    router.push("/login");
+    try {
+      await logout();
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+    router.push("/");
   };
 
   return (

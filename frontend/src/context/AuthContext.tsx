@@ -1,100 +1,145 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { User, AuthResponse } from "../types";
-import { fetcher, getStoredToken, setStoredAuth, clearStoredAuth, AUTH_USER_KEY } from "../lib/api";
+import {
+  User as FirebaseUser,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
+import { auth, googleProvider, microsoftProvider } from "../lib/firebase";
+
+export interface AuthUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
 
 interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  user: AuthUser | null;
+  firebaseUser: FirebaseUser | null;
+  loading: boolean;
+  isLoading: boolean; // Alias for backward compatibility
   signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  loginWithMicrosoft: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function formatFirebaseError(error: any): string {
+  if (!error) return "An unexpected error occurred.";
+  const code = error.code || "";
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    const initAuth = async () => {
-      const storedToken = getStoredToken();
-      if (!storedToken) {
-        setIsLoading(false);
-        return;
-      }
-
-      setToken(storedToken);
-
-      // Try cached user first for instantaneous UI render
-      if (typeof window !== "undefined") {
-        const cachedUser = localStorage.getItem(AUTH_USER_KEY);
-        if (cachedUser) {
-          try {
-            setUser(JSON.parse(cachedUser));
-          } catch {}
+  switch (code) {
+    case "auth/email-already-in-use":
+      return "An account with this email already exists.";
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/weak-password":
+      return "Password is too weak. Please use at least 6 characters.";
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+      return "Incorrect email or password. Please try again.";
+    case "auth/popup-closed-by-user":
+      return "Sign-in popup was closed before completing.";
+    case "auth/popup-blocked":
+      return "Sign-in popup was blocked by your browser. Please allow popups for this site.";
+    case "auth/operation-not-allowed":
+      return "This sign-in provider is not enabled in the Firebase Console.";
+    case "auth/account-exists-with-different-credential":
+      return "An account already exists with the same email using a different sign-in method.";
+    case "auth/network-request-failed":
+      return "Network error. Please check your internet connection.";
+    case "auth/unauthorized-domain":
+      return "This domain is not authorized in Firebase Authentication. Please add localhost to Authorized Domains in Firebase Console.";
+    default:
+      if (error.message && typeof error.message === "string") {
+        if (error.message.includes("configuration-not-found") || error.message.includes("OPERATION_NOT_ALLOWED")) {
+          return "This authentication provider is not configured in Firebase Console. Please enable it in Authentication -> Sign-in method.";
         }
+        return error.message.replace(/^Firebase:\s*/, "");
       }
+      return "Authentication failed. Please try again.";
+  }
+}
 
-      // Verify token with backend /api/auth/me
-      try {
-        const userData: User = await fetcher("/auth/me");
-        setUser(userData);
-        setStoredAuth(storedToken, userData);
-      } catch (err) {
-        console.warn("Session expired or invalid, clearing auth", err);
-        clearStoredAuth();
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        setFirebaseUser(fbUser);
+        setUser({
+          uid: fbUser.uid,
+          email: fbUser.email,
+          displayName: fbUser.displayName || fbUser.email?.split("@")[0] || "User",
+          photoURL: fbUser.photoURL,
+        });
+      } else {
+        setFirebaseUser(null);
         setUser(null);
-        setToken(null);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    initAuth();
-  }, []);
-
-  const login = useCallback(async (email: string, password: string) => {
-    const res: AuthResponse = await fetcher("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
+      setLoading(false);
     });
 
-    setToken(res.access_token);
-    setUser(res.user);
-    setStoredAuth(res.access_token, res.user);
+    return () => unsubscribe();
   }, []);
 
   const signup = useCallback(async (name: string, email: string, password: string) => {
-    const res: AuthResponse = await fetcher("/auth/signup", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    setToken(res.access_token);
-    setUser(res.user);
-    setStoredAuth(res.access_token, res.user);
+    const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+    if (name.trim()) {
+      await updateProfile(userCredential.user, {
+        displayName: name.trim(),
+      });
+      setUser({
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: name.trim(),
+        photoURL: userCredential.user.photoURL,
+      });
+    }
   }, []);
 
-  const logout = useCallback(() => {
-    clearStoredAuth();
+  const login = useCallback(async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email.trim(), password);
+  }, []);
+
+  const loginWithGoogle = useCallback(async () => {
+    await signInWithPopup(auth, googleProvider);
+  }, []);
+
+  const loginWithMicrosoft = useCallback(async () => {
+    await signInWithPopup(auth, microsoftProvider);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await signOut(auth);
     setUser(null);
-    setToken(null);
+    setFirebaseUser(null);
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token,
-        isLoading,
-        login,
+        firebaseUser,
+        loading,
+        isLoading: loading,
         signup,
+        login,
+        loginWithGoogle,
+        loginWithMicrosoft,
         logout,
       }}
     >
